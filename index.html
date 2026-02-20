@@ -9,8 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2693/2693507.png">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Nomina Pro","short_name":"Nomina","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2693/2693507.png","sizes":"192x192","type":"image/png"}]}'>
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Nomina Pro","short_name":"Nomina","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"icono.png","sizes":"192x192","type":"image/png"}]}'>
 
     <style>
         :root {
@@ -50,7 +50,7 @@
             display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
         }
         .btn-nav { font-size: 1.5rem; font-weight: 900; }
-        .btn-config { font-size: 1.2rem; }
+        .btn-config { font-size: 1.2rem; margin-left: 10px; }
 
         /* STATS */
         .mini-stats {
@@ -151,7 +151,7 @@
         .btn-close { float: right; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;}
         .btn-file { background: #333; border: 1px solid #555; color: #fff; padding: 10px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; margin-top:5px;}
         
-        .btn-install { background: linear-gradient(45deg, #00b09b, #96c93d); color: #000; margin-bottom: 15px; border: none; font-size: 1rem; text-transform: uppercase; box-shadow: 0 4px 15px rgba(150, 201, 61, 0.4); display: none;} /* Oculto por defecto, se activa si es PWA */
+        .btn-install { background: linear-gradient(45deg, #00b09b, #96c93d); color: #000; margin-bottom: 15px; border: none; font-size: 1rem; text-transform: uppercase; box-shadow: 0 4px 15px rgba(150, 201, 61, 0.4); display: none;}
 
         /* NÓMINA Y TOTAL ANUAL */
         .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: "Courier New", Courier, monospace; border: 1px solid #ccc; }
@@ -279,7 +279,7 @@
                     <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA</button>
                     <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                     <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V20 PWA READY</div>
+                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V21 QUICK BACKUP EDITION</div>
                 </div>
 
                 <div id="tab-nomina" class="tab-content">
@@ -314,6 +314,7 @@
             <h2 id="mesTitulo" onclick="irAHoy()">ENERO</h2>
             <div style="display:flex;">
                 <button class="btn-nav" onclick="cambiarMes(1)">❯</button>
+                <button class="btn-config" onclick="descargarCopia()" title="Guardar Copia Rápida">💾</button>
                 <button class="btn-config" onclick="abrirConfig()">⚙️</button>
             </div>
         </div>
@@ -410,7 +411,6 @@
 
         renderCalendario();
         
-        // Registrar Service Worker Dummy para activar PWA
         if ('serviceWorker' in navigator) {
             const swContent = "self.addEventListener('install', (e) => { console.log('SW Installed'); }); self.addEventListener('fetch', (e) => {});";
             const blob = new Blob([swContent], {type: 'text/javascript'});
@@ -698,7 +698,7 @@
             extras: horasExtra, start: document.getElementById('cycleStartDate').value
         };
         const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p));
-        const a = document.createElement('a'); a.href = s; a.download = "nomina_backup_V20.json"; a.click();
+        const a = document.createElement('a'); a.href = s; a.download = "nomina_backup.json"; a.click();
     }
     
     function cargarCopia(i) {
@@ -719,7 +719,7 @@
                 localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
                 localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
                 
-                renderCalendario(); cerrarConfig(); alert("Datos cargados (V20)");
+                renderCalendario(); cerrarConfig(); alert("Datos cargados correctamente.");
             } catch(err) {
                 alert("Error al leer archivo.");
             }
