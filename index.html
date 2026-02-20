@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>Nómina Stellantis PRO</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2693/2693507.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Nomina Pro","short_name":"Nomina","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2693/2693507.png","sizes":"192x192","type":"image/png"}]}'>
+
+    <style>
+        :root {
+            --bg-body: #050505; --bg-panel: #111111; --text-main: #ffffff;
+            --color-noche: #2979ff; --color-festivo: #ff1744; --color-vacaciones: #00e676;
+            --color-convenio: #ffea00; --color-adecuacion: #00b0ff; 
+            --color-descanso: #1a1a1a;
+            --color-extra: #ff9100;
+            --color-total: #00e676;
+            --color-bolsa: #ffd700;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+            background-color: var(--bg-body); color: var(--text-main);
+            margin: 0; padding: 0; height: 100vh; height: 100dvh;
+            display: flex; justify-content: center; overflow: hidden;
+            -webkit-tap-highlight-color: transparent; user-select: none;
+        }
+        #app-container {
+            width: 100%; max-width: 600px; height: 100%;
+            display: flex; flex-direction: column;
+            background-color: var(--bg-body); 
+            border-left: 1px solid #222; border-right: 1px solid #222;
+        }
+        /* CABECERA */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 1rem; background: var(--bg-panel); border-bottom: 1px solid #333; flex-shrink: 0; height: 60px;
+        }
+        h2 { 
+            margin: 0; color: #fff; text-transform: uppercase; font-weight: 900; 
+            font-size: clamp(1.2rem, 5vw, 1.8rem); cursor: pointer;
+        }
+        .btn-nav, .btn-config {
+            background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+        }
+        .btn-nav { font-size: 1.5rem; font-weight: 900; }
+        .btn-config { font-size: 1.2rem; }
+
+        /* STATS */
+        .mini-stats {
+            display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
+            background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center;
+            overflow-x: auto; gap: 2px;
+        }
+        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
+        .stat-item:last-child { border-right: none; }
+        .stat-label { font-size: 0.5rem; margin-bottom: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .stat-val { font-size: 0.9rem; color: #fff; line-height: 1; }
+
+        /* CALENDARIO */
+        .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background: #000; }
+        .week-days {
+            display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
+            color: #666; font-weight: 900; padding: 10px 0 5px 0; background: #000; font-size: 0.75rem;
+        }
+        .day-name-full { display: none; } .day-name-short { display: block; }
+        @media (min-width: 450px) { .day-name-full { display: block; } .day-name-short { display: none; } }
+
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr);
+            gap: 4px; height: 100%; padding: 5px;
+        }
+        .day-cell {
+            background-color: var(--color-descanso); 
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative;
+            border-radius: 8px; transition: transform 0.1s;
+        }
+        .day-cell.today {
+            transform: scale(1.1); z-index: 50; border: 2px solid #ffffff; 
+            box-shadow: 0 0 15px var(--color-adecuacion);
+            animation: latido 2s infinite;
+        }
+        @keyframes latido {
+            0% { box-shadow: 0 0 10px var(--color-adecuacion); }
+            50% { box-shadow: 0 0 25px var(--color-adecuacion); }
+            100% { box-shadow: 0 0 10px var(--color-adecuacion); }
+        }
+
+        .badge-extra {
+            position: absolute; top: 2px; right: 3px; 
+            background: var(--color-extra); color: #000;
+            font-size: 0.6rem; font-weight: 900; padding: 1px 3px; border-radius: 3px;
+        }
+        .day-num { font-size: clamp(1.2rem, 4dvh, 1.8rem); font-weight: 900; color: #666; line-height: 1; }
+        .day-label { font-size: 0.6rem; font-weight: 900; color: #444; text-transform: uppercase;}
+        
+        .day-cell.noche { background-color: var(--color-noche); }
+        .day-cell.noche .day-num, .day-cell.noche .day-label { color: #fff; }
+        .day-cell.festivo { background-color: var(--color-festivo); }
+        .day-cell.festivo .day-num, .day-cell.festivo .day-label { color: #fff; }
+        .day-cell.vacaciones { background-color: var(--color-vacaciones); }
+        .day-cell.convenio { background-color: var(--color-convenio); }
+        .day-cell.adecuacion { background-color: var(--color-adecuacion); }
+        .day-cell.empty { visibility: hidden; }
+
+        /* LEYENDA */
+        .leyenda {
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px;
+            background: #080808; border-top: 1px solid #222; flex-shrink: 0;
+        }
+        .leyenda-item { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block;}
+
+        /* RESUMEN PANEL */
+        .resumen-panel {
+            background: var(--bg-panel); border-top: 1px solid #333; padding: 10px; flex-shrink: 0;
+            display: grid; grid-template-columns: 1.4fr 1fr; gap: 5px; align-items: center;
+            min-height: 100px; padding-bottom: max(15px, env(safe-area-inset-bottom));
+        }
+        .resumen-col-left { display: flex; flex-direction: column; gap: 3px; font-size: 0.85rem; color: #fff; font-weight: bold;}
+        .resumen-row { display: flex; justify-content: space-between; width: 100%; border-bottom: 1px solid #333; padding-bottom: 2px;}
+        .resumen-col-right { text-align: right; display:flex; flex-direction:column; justify-content:center;}
+        .total-grande { font-size: 2.5rem; font-weight: 900; color: var(--color-noche); line-height: 0.9;}
+        .subtext { font-size: 0.7rem; color: #666; text-transform: uppercase; margin-top: 2px;}
+        
+        .btn-add-horas {
+            grid-column: 1 / -1; background: #2a2a2a; color: var(--color-extra); border: 1px solid #444; 
+            padding: 10px; border-radius: 6px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.85rem;
+            display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px;
+        }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
+        .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 20px;}
+        .config-row { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .config-row label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 4px;}
+        .config-row input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px; font-weight: bold;}
+        .help-text { display: block; font-size: 0.7rem; color: #aaa; margin-top: 4px; font-style: italic; border-left: 2px solid var(--color-convenio); padding-left: 5px;}
+        .btn-save { width: 100%; background: var(--color-noche); color: #fff; padding: 12px; border: none; font-weight: bold; border-radius: 8px; margin-top: 10px; cursor: pointer;}
+        .tabs { display: flex; gap: 2px; margin-bottom: 15px; border-bottom: 1px solid #333;}
+        .tab { flex: 1; padding: 8px; text-align: center; cursor: pointer; background: #222; font-size: 0.7rem; font-weight: bold; border-radius: 5px 5px 0 0;}
+        .tab.active { background: #1e1e1e; color: var(--color-noche); border-bottom: 2px solid var(--color-noche); }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+        .btn-close { float: right; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;}
+        .btn-file { background: #333; border: 1px solid #555; color: #fff; padding: 10px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; margin-top:5px;}
+        
+        .btn-install { background: linear-gradient(45deg, #00b09b, #96c93d); color: #000; margin-bottom: 15px; border: none; font-size: 1rem; text-transform: uppercase; box-shadow: 0 4px 15px rgba(150, 201, 61, 0.4); display: none;} /* Oculto por defecto, se activa si es PWA */
+
+        /* NÓMINA Y TOTAL ANUAL */
+        .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: "Courier New", Courier, monospace; border: 1px solid #ccc; }
+        .nomina-header { text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; text-transform: uppercase; }
+        .nomina-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .nomina-table th { border-bottom: 1px solid #000; text-align: right; padding: 5px; color: #444; }
+        .nomina-table th:first-child { text-align: left; }
+        .nomina-table td { padding: 4px 5px; border-bottom: 1px solid #eee; text-align: right; }
+        .nomina-table td:first-child { text-align: left; font-weight: bold; }
+        .nomina-footer { margin-top: 15px; border-top: 2px solid #000; padding-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .nom-row-total { display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .nom-selector { width: 100%; padding: 8px; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
+        
+        .total-anual-box {
+            margin-top: 20px; padding: 15px; border: 1px solid #333; background: #111; border-radius: 8px; text-align: center;
+        }
+        .total-anual-val { font-size: 1.8rem; font-weight: 900; color: var(--color-total); margin-top: 5px;}
+
+        /* EDITOR PATRON */
+        .pattern-editor { border: 1px solid #444; padding: 5px; border-radius: 8px; background: #111; margin-bottom: 15px;}
+        .editor-legend { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; font-size: 0.8rem; font-weight: bold; background: #222; padding: 8px; border-radius: 4px; }
+        .legend-tag { display: flex; align-items: center; gap: 8px; color: #fff; }
+        .legend-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #777; }
+        .pattern-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #333; border: 1px solid #444; border-radius: 4px; overflow: hidden;}
+        .p-head { background: #000; color: #888; text-align: center; font-size: 0.7rem; padding: 4px 0; font-weight: bold; }
+        .p-cell { text-align: center; height: 35px; cursor: pointer; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.9rem; color: #fff; }
+        .p-cell span { font-size: 0.6em; font-weight: normal; color: #aaa; line-height: 1; }
+        .p-work { background-color: var(--color-noche); } .p-rest { background-color: var(--color-descanso); color: #000; } .p-rest span { color: #555; }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <div id="extraModal" class="modal">
+            <div class="modal-content">
+                <button class="btn-close" onclick="cerrarExtraModal()">&times;</button>
+                <h3>⏱️ ANOTAR HORAS EXTRA</h3>
+                <div class="config-row">
+                    <label>Fecha:</label>
+                    <input type="date" id="inputExtraFecha">
+                </div>
+                <div class="config-row">
+                    <label>Horas Extra realizadas:</label>
+                    <input type="number" id="inputExtraValor" step="0.1" placeholder="Ej: 2">
+                </div>
+                <button class="btn-save" style="background:var(--color-extra); color:#000;" onclick="guardarExtraDia()">GUARDAR</button>
+            </div>
+        </div>
+
+        <div id="configModal" class="modal">
+            <div class="modal-content">
+                <button class="btn-close" onclick="cerrarConfig()">&times;</button>
+                <h3 style="margin-top:0;">CONFIGURACIÓN</h3>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('tab-precios')">PRECIOS</div>
+                    <div class="tab" onclick="switchTab('tab-turnos')">TURNOS</div>
+                    <div class="tab" onclick="switchTab('tab-datos')">DATOS</div>
+                    <div class="tab" onclick="switchTab('tab-nomina')">NÓMINA</div>
+                </div>
+
+                <div id="tab-precios" class="tab-content active">
+                    <div class="config-row">
+                        <label>Salario Mensual (Base):</label>
+                        <input type="number" id="confSalario" step="0.01">
+                        <span class="help-text">🔎 Salario Base de una nómina normal.</span>
+                    </div>
+                    <div class="config-row">
+                        <label>Importe Paga Extra:</label>
+                        <input type="number" id="confPagaExtra" step="0.01">
+                        <span class="help-text">🎁 Importe Junio/Diciembre.</span>
+                    </div>
+                    <div class="config-row">
+                        <label>Hora Noche (K05):</label>
+                        <input type="number" id="confNoche" step="0.0001">
+                        <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>K05</b>.</span>
+                    </div>
+                    <div class="config-row">
+                        <label>Garantía (K75):</label>
+                        <input type="number" id="confGarantia" step="0.0001">
+                        <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>K75</b>.</span>
+                    </div>
+                    <div class="config-row">
+                        <label>Festivo (KA9):</label>
+                        <input type="number" id="confFestivo" step="0.0001">
+                        <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>KA9</b>.</span>
+                    </div>
+                    <div class="config-row">
+                        <label>% IRPF + SS:</label>
+                        <input type="number" id="confDeduccion" step="0.001">
+                        <span class="help-text">🧮 Ej: 21% IRPF + 6.35% SS = Pon <b>0.2735</b></span>
+                    </div>
+                    <button class="btn-save" onclick="guardarConfig()">GUARDAR PRECIOS</button>
+                </div>
+
+                <div id="tab-turnos" class="tab-content">
+                    <div class="config-row">
+                        <label>Fecha Inicio Ciclo:</label>
+                        <input type="date" id="cycleStartDate" onchange="renderEditorGrid()">
+                    </div>
+                    <div class="pattern-editor">
+                        <div class="editor-legend">
+                            <div class="legend-tag"><div class="legend-box" style="background:var(--color-noche)"></div>TRABAJO</div>
+                            <div class="legend-tag"><div class="legend-box" style="background:var(--color-descanso)"></div>LIBRE</div>
+                        </div>
+                        <div class="pattern-grid" id="patternGrid"></div>
+                    </div>
+                    <div class="config-row" style="margin-top:15px;">
+                        <label>Año a rellenar:</label>
+                        <input type="number" id="applyYear">
+                    </div>
+                    <button class="btn-save" onclick="aplicarPatron()">APLICAR PATRÓN</button>
+                    <button class="btn-save btn-danger" onclick="resetearCalendario()">BORRAR AÑO</button>
+                </div>
+
+                <div id="tab-datos" class="tab-content">
+                    <button id="btnInstall" class="btn-save btn-install" onclick="instalarApp()">📲 INSTALAR APP</button>
+                    
+                    <div class="config-row">
+                        <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial):</label>
+                        <input type="number" id="confBolsa" step="0.01">
+                    </div>
+                    <button class="btn-save" onclick="guardarConfig()">ACTUALIZAR BOLSA</button>
+                    <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+                    <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA</button>
+                    <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
+                    <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
+                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V20 PWA READY</div>
+                </div>
+
+                <div id="tab-nomina" class="tab-content">
+                    <label style="font-size:0.8rem; color:#aaa;">SELECCIONAR MES:</label>
+                    <select id="nominaMonthSelector" class="nom-selector" onchange="renderNominaDetallada()"></select>
+                    
+                    <div class="nomina-sheet">
+                        <div class="nomina-header" id="nomHeaderTitle">SIMULACIÓN NÓMINA</div>
+                        <table class="nomina-table">
+                            <thead><tr><th>CONCEPTO</th><th>UNID.</th><th>PRECIO</th><th>TOTAL</th></tr></thead>
+                            <tbody id="nominaBody"></tbody>
+                        </table>
+                        <div class="nomina-footer">
+                            <div class="nom-row-total"><span>TOTAL DEVENGADO</span><span id="nomBruto">0,00 €</span></div>
+                            <div class="nom-row-total" style="color:#d32f2f;"><span>DEDUCCIONES</span><span id="nomDeducciones">-0,00 €</span></div>
+                            <div class="nom-row-total" style="font-weight:900; font-size:1.1rem; margin-top:5px; border-top:1px dashed #000;"><span>LÍQUIDO</span><span id="nomNeto">0,00 €</span></div>
+                        </div>
+                    </div>
+
+                    <div class="total-anual-box">
+                        <span style="font-size:0.8rem; color:#aaa; letter-spacing:1px; text-transform:uppercase;">TOTAL BRUTO ANUAL ESTIMADO</span>
+                        <div class="total-anual-val" id="statTotalEurosConfig">0€</div>
+                        <span style="font-size:0.7rem; color:#666;">(Incluye 2 Pagas + Variables)</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="header">
+            <button class="btn-nav" onclick="cambiarMes(-1)">❮</button>
+            <h2 id="mesTitulo" onclick="irAHoy()">ENERO</h2>
+            <div style="display:flex;">
+                <button class="btn-nav" onclick="cambiarMes(1)">❯</button>
+                <button class="btn-config" onclick="abrirConfig()">⚙️</button>
+            </div>
+        </div>
+
+        <div class="mini-stats">
+            <div class="stat-item"><span class="stat-label">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-extra)">EXTRAS</span><span class="stat-val" id="statHorasExtra">0h</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-noche)">DÍAS T.</span><span class="stat-val" id="statDiasTrabajados">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-convenio)">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-adecuacion)">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="week-days">
+                <div><span class="day-name-full">LUNES</span><span class="day-name-short">LUN</span></div>
+                <div><span class="day-name-full">MARTES</span><span class="day-name-short">MAR</span></div>
+                <div><span class="day-name-full">MIERCOLES</span><span class="day-name-short">MIE</span></div>
+                <div><span class="day-name-full">JUEVES</span><span class="day-name-short">JUE</span></div>
+                <div><span class="day-name-full">VIERNES</span><span class="day-name-short">VIE</span></div>
+                <div><span class="day-name-full">SABADO</span><span class="day-name-short">SAB</span></div>
+                <div><span class="day-name-full">DOMINGO</span><span class="day-name-short">DOM</span></div>
+            </div>
+            <div class="calendar-grid" id="diasContainer"></div>
+        </div>
+
+        <div class="leyenda">
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-noche)"></span>NOCHE</div>
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-festivo)"></span>FESTIVO</div>
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-vacaciones)"></span>VACAS</div>
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-convenio)"></span>CONV</div>
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-adecuacion)"></span>ADEC</div>
+            <div class="leyenda-item"><span class="dot" style="background:var(--color-descanso)"></span>LIBRE</div>
+        </div>
+
+        <div class="resumen-panel">
+            <div class="resumen-col-left">
+                <div class="resumen-row"><span>NOCHES (<span id="countNoches">0</span>):</span><span id="valNoches" style="color:var(--color-noche);">0.00 €</span></div>
+                <div class="resumen-row"><span>FESTIV (<span id="countFestivos">0</span>):</span><span id="valFestivos" style="color:var(--color-festivo);">0.00 €</span></div>
+                <div class="resumen-row"><span>EXTRAS/OTR:</span><span id="valExtras" style="color:var(--color-extra);">0.00 €</span></div>
+            </div>
+            <div class="resumen-col-right">
+                <div class="total-grande" id="totalLiquido">0 €</div>
+                <span class="subtext">NETO (MES)</span>
+            </div>
+            <button class="btn-add-horas" onclick="abrirExtraModal()">⏱️ AÑADIR HORAS EXTRA (DÍA)</button>
+        </div>
+    </div>
+
+<script>
+    // CLAVES
+    const K_DATA = 'nomina_stellantis_universal_data_v3'; 
+    const K_CONF = 'nomina_stellantis_universal_config_v4';
+    const K_EXTR = 'nomina_stellantis_universal_extras_diarias_v1';
+    const K_PATRON = 'nomina_stellantis_universal_patron_v3';
+    const K_START = 'nomina_stellantis_universal_start_v3';
+
+    let fechaActual = new Date(); 
+    let datosGuardados = {}; 
+    let horasExtra = {}; 
+    let patronPlano = new Array(42).fill(0);
+    let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0 };
+    
+    // PWA INSTALL LOGIC
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('btnInstall').style.display = 'block';
+    });
+
+    function instalarApp() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
+        } else {
+            alert("PARA INSTALAR (Si no ves el menú):\n1. Sube este archivo a netlify.drop.\n2. Abre el enlace generado.\n3. Ahora sí verás 'Instalar aplicación' en el menú.");
+        }
+    }
+
+    function init() {
+        if(localStorage.getItem(K_DATA)) datosGuardados = JSON.parse(localStorage.getItem(K_DATA));
+        if(localStorage.getItem(K_CONF)) configActual = JSON.parse(localStorage.getItem(K_CONF));
+        if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
+        if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
+        
+        let savedStart = localStorage.getItem(K_START);
+        if(!savedStart) savedStart = "2026-01-01";
+        document.getElementById('cycleStartDate').value = savedStart;
+        document.getElementById('applyYear').value = fechaActual.getFullYear();
+        
+        if(!configActual.pagaExtra) configActual.pagaExtra = configActual.salario;
+        if(configActual.bolsa === undefined) configActual.bolsa = 0;
+
+        renderCalendario();
+        
+        // Registrar Service Worker Dummy para activar PWA
+        if ('serviceWorker' in navigator) {
+            const swContent = "self.addEventListener('install', (e) => { console.log('SW Installed'); }); self.addEventListener('fetch', (e) => {});";
+            const blob = new Blob([swContent], {type: 'text/javascript'});
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(console.log);
+        }
+    }
+
+    function abrirExtraModal() {
+        document.getElementById('extraModal').style.display = 'flex';
+        document.getElementById('inputExtraFecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('inputExtraValor').value = "";
+    }
+    function cerrarExtraModal() { document.getElementById('extraModal').style.display = 'none'; }
+    
+    function guardarExtraDia() {
+        const f = document.getElementById('inputExtraFecha').value;
+        const v = parseFloat(document.getElementById('inputExtraValor').value);
+        if(!f) return;
+        if(!v || v === 0) delete horasExtra[f]; else horasExtra[f] = v;
+        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
+        cerrarExtraModal(); renderCalendario();
+    }
+
+    function renderCalendario() {
+        const y = fechaActual.getFullYear(), m = fechaActual.getMonth();
+        const hoy = new Date();
+        document.getElementById('mesTitulo').innerText = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
+        
+        const primerDia = new Date(y, m, 1).getDay();
+        const esp = primerDia === 0 ? 6 : primerDia - 1;
+        const totalDias = new Date(y, m + 1, 0).getDate();
+        
+        const c = document.getElementById('diasContainer'); c.innerHTML = '';
+        for(let i=0; i<esp; i++) c.innerHTML += '<div class="day-cell empty"></div>';
+        
+        let cN=0, cF=0;
+        for (let d = 1; d <= totalDias; d++) {
+            const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const est = datosGuardados[k] || 0;
+            let cls='', txt='LIBRE';
+            if(est===1) { cls='noche'; txt='NOCHE'; cN++; }
+            else if(est===2) { cls='festivo'; txt='FESTIVO'; cN++; cF++; }
+            else if(est===3) { cls='vacaciones'; txt='VACAS'; }
+            else if(est===4) { cls='convenio'; txt='CONV'; }
+            else if(est===5) { cls='adecuacion'; txt='ADEC'; }
+            
+            const div = document.createElement('div');
+            div.className = `day-cell ${cls}`;
+            if (y === hoy.getFullYear() && m === hoy.getMonth() && d === hoy.getDate()) div.classList.add('today');
+            
+            if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
+            div.innerHTML += `<div class="day-num">${d}</div><div class="day-label">${txt}</div>`;
+            div.onclick = () => toggleDia(d);
+            c.appendChild(div);
+        }
+        calcularTotales(cN, cF); calcularAnuales(y);
+    }
+
+    function toggleDia(d) {
+        const k = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 6;
+        if(datosGuardados[k] === 0) delete datosGuardados[k];
+        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+        renderCalendario();
+    }
+
+    function parseSafeDate(str) { const p = str.split('-'); return new Date(p[0], p[1]-1, p[2], 12,0,0); }
+    function getMondayOfDate(d) {
+        const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const m = new Date(d); m.setDate(diff); return m;
+    }
+    function getDaysDiff(d1, d2) {
+        const date1 = new Date(d1); date1.setHours(12,0,0,0);
+        const date2 = new Date(d2); date2.setHours(12,0,0,0);
+        return Math.round((date2 - date1) / (1000*60*60*24));
+    }
+    function renderEditorGrid() {
+        const startStr = document.getElementById('cycleStartDate').value;
+        if(!startStr) return;
+        localStorage.setItem(K_START, startStr);
+        const refMonday = getMondayOfDate(parseSafeDate(startStr));
+        const grid = document.getElementById('patternGrid');
+        if(!grid) return;
+        let html = '<div class="p-head">L</div><div class="p-head">M</div><div class="p-head">X</div><div class="p-head">J</div><div class="p-head">V</div><div class="p-head">S</div><div class="p-head">D</div>';
+        for(let i=0; i<42; i++) {
+            const cd = new Date(refMonday); cd.setDate(refMonday.getDate() + i);
+            let cls = "p-cell" + (patronPlano[i]===1 ? " p-rest" : " p-work");
+            html += `<div class="${cls}" onclick="togglePatronIndex(${i})">${cd.getDate()} <span>${cd.toLocaleDateString('es-ES',{month:'short'}).toUpperCase()}</span></div>`;
+        }
+        grid.innerHTML = html;
+    }
+    function togglePatronIndex(i) {
+        patronPlano[i] = patronPlano[i] === 1 ? 0 : 1;
+        localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
+        renderEditorGrid();
+    }
+    function aplicarPatron() {
+        const year = parseInt(document.getElementById('applyYear').value);
+        const startStr = document.getElementById('cycleStartDate').value;
+        if(!year || !startStr) return;
+        const refMonday = getMondayOfDate(parseSafeDate(startStr));
+        for (let key in datosGuardados) { if(key.startsWith(year + "-")) delete datosGuardados[key]; }
+        
+        const d = new Date(year, 0, 1, 12, 0, 0);
+        const end = new Date(year, 11, 31, 12, 0, 0);
+        while (d <= end) {
+            const diff = getDaysDiff(refMonday, d);
+            let pIdx = diff % 42; if (pIdx < 0) pIdx += 42;
+            if (patronPlano[pIdx] !== 1) { 
+                let w = d.getDay();
+                datosGuardados[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] = (w===0||w===6) ? 2 : 1;
+            }
+            d.setDate(d.getDate() + 1);
+        }
+        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+        alert(`Año ${year} actualizado.`); renderCalendario(); cerrarConfig();
+    }
+    function resetearCalendario() {
+        const y = document.getElementById('applyYear').value;
+        if(confirm(`¿Borrar datos ${y}?`)) {
+            for (let key in datosGuardados) { if(key.startsWith(y + "-")) delete datosGuardados[key]; }
+            localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+            renderCalendario();
+        }
+    }
+
+    function calcularAnuales(year) {
+        let diasT=0, c=0, a=0, hExtraAnual=0;
+        for(const [k,est] of Object.entries(datosGuardados)) {
+            if(k.startsWith(year)) {
+                if(est===1 || est===2) diasT++;
+                if(est===4) c++; if(est===5) a++;
+            }
+        }
+        for(const [k,val] of Object.entries(horasExtra)) {
+            if(k.startsWith(year)) hExtraAnual += val;
+        }
+        
+        let hTrabajadasTurno = diasT * 7.75;
+        let totalHTrabajadas = hTrabajadasTurno + hExtraAnual;
+        
+        let varAnual = 0;
+        for(const [k,est] of Object.entries(datosGuardados)) {
+            if(k.startsWith(year)) {
+                if(est===1) varAnual += (7.75 * configActual.noche) + (3.875 * configActual.garantia);
+                if(est===2) varAnual += (7.75 * configActual.noche) + (3.875 * configActual.garantia) + (7.75 * configActual.festivo);
+            }
+        }
+        let brutoAnual = (configActual.salario * 12) + (configActual.pagaExtra * 2) + varAnual;
+
+        document.getElementById('statDiasTrabajados').innerText = diasT;
+        document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
+        document.getElementById('statHorasTrabajadas').innerText = totalHTrabajadas.toFixed(1) + "h";
+        document.getElementById('statBolsa').innerText = configActual.bolsa.toFixed(1) + "h";
+        document.getElementById('statConvenio').innerText = c;
+        document.getElementById('statAdecuacion').innerText = a;
+        document.getElementById('statTotalEurosConfig').innerText = Math.round(brutoAnual).toLocaleString() + "€";
+    }
+
+    function calcularTotales(n, f) {
+        let hN = n * 7.75, hF = f * 7.75;
+        let bruto = configActual.salario + (hN * configActual.noche) + (hN/2 * configActual.garantia) + (hF * configActual.festivo);
+        let neto = bruto * (1 - configActual.deduccion);
+        document.getElementById('countNoches').innerText = n;
+        document.getElementById('valNoches').innerText = (hN * configActual.noche + hN/2 * configActual.garantia).toFixed(2) + " €";
+        document.getElementById('valFestivos').innerText = (hF * configActual.festivo).toFixed(2) + " €";
+        document.getElementById('totalLiquido').innerText = neto.toFixed(2) + " €";
+    }
+
+    function initMonthSelector() {
+        const sel = document.getElementById('nominaMonthSelector');
+        sel.innerHTML = "";
+        const meses = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+        const y = fechaActual.getFullYear();
+        meses.forEach((m, i) => {
+            let opt = document.createElement('option');
+            opt.value = `${y}-${String(i+1).padStart(2,'0')}`;
+            opt.text = `${m} ${y}`;
+            sel.appendChild(opt);
+        });
+        sel.value = `${y}-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    function renderNominaDetallada() {
+        const selVal = document.getElementById('nominaMonthSelector').value; 
+        const [yearStr, monthStr] = selVal.split('-');
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr);
+
+        let cN = 0, cF = 0, hExtraMes = 0;
+        const daysInMonth = new Date(year, month, 0).getDate();
+        
+        for(let d=1; d<=daysInMonth; d++) {
+            let k = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let v = datosGuardados[k] || 0;
+            if(v===1) cN++; 
+            if(v===2) { cN++; cF++; }
+            if(horasExtra[k]) hExtraMes += horasExtra[k];
+        }
+
+        let hNoche = cN * 7.75;
+        let hGarantia = hNoche / 2;
+        let hFestivo = cF * 7.75;
+
+        let impBase = configActual.salario;
+        let impNoche = hNoche * configActual.noche;
+        let impGarantia = hGarantia * configActual.garantia;
+        let impFestivo = hFestivo * configActual.festivo;
+        
+        let impPagaExtra = 0;
+        let rowPagaExtra = "";
+        if (month === 6 || month === 12) {
+            impPagaExtra = configActual.pagaExtra;
+            let label = month === 6 ? "Paga Extra Junio" : "Paga Extra Navidad";
+            rowPagaExtra = `<tr><td>${label}</td><td>1.00</td><td>${fmtM(configActual.pagaExtra)}</td><td>${fmtM(impPagaExtra)}</td></tr>`;
+        }
+
+        let rowExtras = "";
+        if(hExtraMes !== 0) {
+            rowExtras = `<tr><td>Horas Extra Realizadas</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(Pend. Pago)</td></tr>`;
+        }
+
+        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra;
+        let totalDeduccion = totalBruto * configActual.deduccion;
+        let liquido = totalBruto - totalDeduccion;
+
+        let html = `
+            <tr><td>Salario Base</td><td>30.00</td><td>-</td><td>${fmtM(impBase)}</td></tr>
+            ${rowPagaExtra}
+            <tr><td>Plus Nocturnidad (K05)</td><td>${fmtN(hNoche)}</td><td>${fmtM(configActual.noche)}</td><td>${fmtM(impNoche)}</td></tr>
+            <tr><td>Garantía (K75)</td><td>${fmtN(hGarantia)}</td><td>${fmtM(configActual.garantia)}</td><td>${fmtM(impGarantia)}</td></tr>
+            <tr><td>Festivo (KA9)</td><td>${fmtN(hFestivo)}</td><td>${fmtM(configActual.festivo)}</td><td>${fmtM(impFestivo)}</td></tr>
+            ${rowExtras}
+        `;
+
+        document.getElementById('nominaBody').innerHTML = html;
+        document.getElementById('nomBruto').innerText = fmtM(totalBruto) + " €";
+        document.getElementById('nomDeducciones').innerText = "-" + fmtM(totalDeduccion) + " €";
+        document.getElementById('nomNeto').innerText = fmtM(liquido) + " €";
+    }
+
+    function fmtN(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function fmtM(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+    function cambiarMes(d) { fechaActual.setMonth(fechaActual.getMonth()+d); renderCalendario(); }
+    function irAHoy() { fechaActual = new Date(); renderCalendario(); }
+    
+    function abrirConfig() { 
+        document.getElementById('configModal').style.display='flex';
+        document.getElementById('confSalario').value = configActual.salario;
+        document.getElementById('confPagaExtra').value = configActual.pagaExtra;
+        document.getElementById('confNoche').value = configActual.noche;
+        document.getElementById('confGarantia').value = configActual.garantia;
+        document.getElementById('confFestivo').value = configActual.festivo;
+        document.getElementById('confDeduccion').value = configActual.deduccion;
+        document.getElementById('confBolsa').value = configActual.bolsa;
+        renderEditorGrid();
+        const year = parseInt(document.getElementById('applyYear').value) || new Date().getFullYear();
+        calcularAnuales(year); 
+    }
+    function cerrarConfig() { document.getElementById('configModal').style.display='none'; }
+    function guardarConfig() {
+        configActual.salario = parseFloat(document.getElementById('confSalario').value);
+        configActual.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value);
+        configActual.noche = parseFloat(document.getElementById('confNoche').value);
+        configActual.garantia = parseFloat(document.getElementById('confGarantia').value);
+        configActual.festivo = parseFloat(document.getElementById('confFestivo').value);
+        configActual.deduccion = parseFloat(document.getElementById('confDeduccion').value);
+        configActual.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
+        localStorage.setItem(K_CONF, JSON.stringify(configActual));
+        cerrarConfig(); renderCalendario();
+    }
+    function switchTab(id) {
+        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+        document.getElementById(id).classList.add('active');
+        if(id === 'tab-nomina') { initMonthSelector(); renderNominaDetallada(); }
+        if(id === 'tab-turnos') renderEditorGrid();
+    }
+    
+    function descargarCopia() {
+        const p = { 
+            data: datosGuardados, config: configActual, patron: patronPlano, 
+            extras: horasExtra, start: document.getElementById('cycleStartDate').value
+        };
+        const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p));
+        const a = document.createElement('a'); a.href = s; a.download = "nomina_backup_V20.json"; a.click();
+    }
+    
+    function cargarCopia(i) {
+        const r = new FileReader();
+        r.onload = e => {
+            try {
+                const p = JSON.parse(e.target.result);
+                if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
+                if(p.config) configActual = p.config; else if(p.c) configActual = p.c;
+                if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
+                if(p.patron) patronPlano = p.patron;
+                if(p.start) localStorage.setItem(K_START, p.start);
+
+                if(!configActual.pagaExtra) configActual.pagaExtra = configActual.salario;
+                
+                localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+                localStorage.setItem(K_CONF, JSON.stringify(configActual));
+                localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
+                localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
+                
+                renderCalendario(); cerrarConfig(); alert("Datos cargados (V20)");
+            } catch(err) {
+                alert("Error al leer archivo.");
+            }
+        };
+        r.readAsText(i.files[0]);
+    }
+    
+    init();
+</script>
+</body>
+</html>
