@@ -36,7 +36,6 @@
             background-color: var(--bg-body); border-left: 1px solid #222; border-right: 1px solid #222;
         }
 
-        /* CABECERA */
         .header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.5rem 1rem; background: var(--bg-panel); border-bottom: 1px solid #333; flex-shrink: 0; height: 60px;
@@ -49,7 +48,6 @@
         .btn-nav { font-size: 1.3rem; font-weight: 900; }
         .btn-config { font-size: 1.1rem; margin-left: 6px; }
 
-        /* MINI STATS PRINCIPAL */
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
             background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center;
@@ -59,7 +57,6 @@
         .stat-label { font-size: 0.5rem; margin-bottom: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
         .stat-val { font-size: 0.9rem; color: #fff; line-height: 1; }
 
-        /* CALENDARIO */
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         .week-days {
             display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
@@ -87,10 +84,8 @@
         .day-cell.today { border: 2px solid #fff; box-shadow: 0 0 10px var(--color-adecuacion); }
         .badge-extra { position: absolute; top: 2px; right: 3px; background: var(--color-extra); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 3px; border-radius: 3px; }
 
-        /* LEYENDA */
         .leyenda { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px; background: #080808; border-top: 1px solid #222; flex-shrink: 0; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
 
-        /* PANEL RESUMEN */
         .resumen-panel {
             background: var(--bg-panel); border-top: 1px solid #333; padding: 10px; flex-shrink: 0;
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;
@@ -100,7 +95,6 @@
         .res-val { font-size: 1.1rem; font-weight: 900; color: #fff; }
         .btn-add-horas-main { grid-column: 1 / -1; background: #222; color: var(--color-extra); border: 1px solid #444; padding: 10px; border-radius: 6px; font-weight: 900; margin-top: 5px; cursor: pointer; text-transform: uppercase; font-size: 0.75rem;}
 
-        /* MODAL */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
         .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 10px;}
         .config-row { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
@@ -113,7 +107,6 @@
         .tab-content { display: none; } .tab-content.active { display: block; }
         .btn-save { width: 100%; background: var(--color-noche); color: #fff; padding: 12px; border: none; font-weight: bold; border-radius: 8px; margin-top: 10px; cursor: pointer; text-transform: uppercase;}
         
-        /* NÓMINA DETALLADA V22 */
         .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: "Courier New", Courier, monospace; border: 1px solid #ccc; }
         .nomina-header { text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; text-transform: uppercase; }
         .nomina-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -123,7 +116,6 @@
         .nomina-table td:first-child { text-align: left; font-weight: bold; }
         .nom-row-total { display: flex; justify-content: space-between; font-size: 0.9rem; }
 
-        /* EDITOR PATRÓN */
         .pattern-editor { border: 1px solid #444; padding: 5px; border-radius: 8px; background: #111; margin-bottom: 15px;}
         .pattern-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #333; border: 1px solid #444; border-radius: 4px; overflow: hidden;}
         .p-head { background: #000; color: #888; text-align: center; font-size: 0.65rem; padding: 4px 0; }
@@ -131,21 +123,17 @@
         .p-cell span { font-size: 0.55em; color: #aaa; margin-top: 2px;}
         .p-work { background-color: var(--color-noche); } .p-rest { background-color: var(--color-descanso); } .p-rest span { color: #ff5252; font-weight: 900; }
 
-        /* BOTONES DATOS */
         .btn-data-group { display: flex; flex-direction: column; gap: 10px; }
         .btn-data { background: #333; color: #fff; border: 1px solid #555; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px;}
         .btn-data.save { background: var(--color-adecuacion); color: #000; border: none; }
+        .btn-data.force-update { background: #00b0ff; color: #000; border: none; font-size: 0.8rem; margin-top: 15px;}
 
-        /* MODO HORIZONTAL OPTIMIZADO PARA PANTALLA COMPLETA */
         @media (orientation: landscape) {
-            /* Ocultamos paneles estáticos para que el calendario ocupe todo */
             .mini-stats, .leyenda, .resumen-panel { display: none !important; }
             #app-container { max-width: 100%; }
-            /* Hacemos la cabecera más estrecha */
             .header { height: 45px; padding: 0 1rem; }
             .btn-nav, .btn-config { width: 30px; height: 30px; font-size: 1rem;}
             h2 { font-size: 1.1rem; }
-            /* Ajustamos la cuadrícula para que no tenga scroll y encaje perfecto */
             .calendar-container { overflow: hidden; }
             .week-days { padding: 4px 0 2px 0; font-size: 0.65rem; }
             .calendar-grid { gap: 2px; padding: 2px; }
@@ -263,6 +251,11 @@
                     <button class="btn-data save" onclick="descargarCopia()">💾 GUARDAR COPIA (JSON)</button>
                     <button class="btn-data" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                     <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
+                    
+                    <hr style="border-color:#333; width:100%; margin: 10px 0;">
+                    
+                    <button class="btn-data force-update" onclick="forzarActualizacion()">🔄 ACTUALIZAR APP (DESDE GITHUB)</button>
+                    <span class="help-text" style="text-align:center; display:block;">Púlsalo si has subido código nuevo y no aparece.</span>
                 </div>
             </div>
         </div>
@@ -304,7 +297,6 @@
         document.getElementById('applyYear').value = fechaActual.getFullYear();
         renderCalendario();
 
-        // SERVICE WORKER MODIFICADO PARA AUTO-ACTUALIZACIÓN SILENCIOSA
         if ('serviceWorker' in navigator) {
             const swContent = "self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); }); self.addEventListener('fetch', (e) => {});";
             const blob = new Blob([swContent], {type: 'text/javascript'});
@@ -474,6 +466,20 @@
     function cambiarMes(d) { fechaActual.setMonth(fechaActual.getMonth()+d); renderCalendario(); }
     function irAHoy() { fechaActual = new Date(); renderCalendario(); }
     function resetearCalendario() { const y = document.getElementById('applyYear').value; if(confirm(`¿Borrarás todos los turnos introducidos del año ${y}?`)) { for(let k in datosGuardados) if(k.startsWith(y)) delete datosGuardados[k]; localStorage.setItem(K_DATA, JSON.stringify(datosGuardados)); renderCalendario(); } }
+
+    // FUNCIÓN PARA DESTRUIR CACHÉ Y FORZAR ACTUALIZACIÓN
+    function forzarActualizacion() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+                window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+            });
+        } else {
+            window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+        }
+    }
 
     init();
 </script>
