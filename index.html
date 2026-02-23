@@ -37,7 +37,6 @@
             background-color: var(--bg-body); 
             border-left: 1px solid #222; border-right: 1px solid #222;
         }
-        /* CABECERA */
         .header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.5rem 1rem; background: var(--bg-panel); border-bottom: 1px solid #333; flex-shrink: 0; height: 60px;
@@ -53,7 +52,6 @@
         .btn-nav { font-size: 1.5rem; font-weight: 900; }
         .btn-config { font-size: 1.2rem; margin-left: 8px; }
 
-        /* STATS */
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
             background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center;
@@ -64,7 +62,6 @@
         .stat-label { font-size: 0.5rem; margin-bottom: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
         .stat-val { font-size: 0.9rem; color: #fff; line-height: 1; }
 
-        /* CALENDARIO */
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background: #000; }
         .week-days {
             display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
@@ -111,7 +108,6 @@
         .day-cell.adecuacion { background-color: var(--color-adecuacion); }
         .day-cell.empty { visibility: hidden; }
 
-        /* LEYENDA */
         .leyenda {
             display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px;
             background: #080808; border-top: 1px solid #222; flex-shrink: 0;
@@ -119,7 +115,6 @@
         .leyenda-item { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
         .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block;}
 
-        /* RESUMEN PANEL */
         .resumen-panel {
             background: var(--bg-panel); border-top: 1px solid #333; padding: 10px; flex-shrink: 0;
             display: grid; grid-template-columns: 1.4fr 1fr; gap: 5px; align-items: center;
@@ -137,7 +132,6 @@
             display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px;
         }
 
-        /* MODAL */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
         .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 20px;}
         .config-row { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
@@ -154,7 +148,6 @@
         
         .btn-install { background: linear-gradient(45deg, #00b09b, #96c93d); color: #000; margin-bottom: 15px; border: none; font-size: 1rem; text-transform: uppercase; box-shadow: 0 4px 15px rgba(150, 201, 61, 0.4); display: none;}
 
-        /* NÓMINA Y TOTAL ANUAL */
         .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: "Courier New", Courier, monospace; border: 1px solid #ccc; }
         .nomina-header { text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; text-transform: uppercase; }
         .nomina-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -171,7 +164,6 @@
         }
         .total-anual-val { font-size: 1.8rem; font-weight: 900; color: var(--color-total); margin-top: 5px;}
 
-        /* EDITOR PATRON */
         .pattern-editor { border: 1px solid #444; padding: 5px; border-radius: 8px; background: #111; margin-bottom: 15px;}
         .editor-legend { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; font-size: 0.8rem; font-weight: bold; background: #222; padding: 8px; border-radius: 4px; }
         .legend-tag { display: flex; align-items: center; gap: 8px; color: #fff; }
@@ -280,7 +272,7 @@
                     <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA</button>
                     <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                     <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V21 PRO FINAL</div>
+                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V22 CLOUD LINK EDITION</div>
                 </div>
 
                 <div id="tab-nomina" class="tab-content">
@@ -366,12 +358,13 @@
     </div>
 
 <script>
-    // CLAVES
     const K_DATA = 'nomina_stellantis_universal_data_v3'; 
     const K_CONF = 'nomina_stellantis_universal_config_v4';
     const K_EXTR = 'nomina_stellantis_universal_extras_diarias_v1';
     const K_PATRON = 'nomina_stellantis_universal_patron_v3';
     const K_START = 'nomina_stellantis_universal_start_v3';
+    // URL DE TU GITHUB PARA EL BACKUP AUTOMÁTICO
+    const CLOUD_URL = 'https://jstony2000.github.io/nomina-app/nomina_backup.json';
 
     let fechaActual = new Date(); 
     let datosGuardados = {}; 
@@ -379,7 +372,6 @@
     let patronPlano = new Array(42).fill(0);
     let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0 };
     
-    // PWA INSTALL LOGIC
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -392,32 +384,57 @@
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
         } else {
-            alert("PARA INSTALAR (Si no ves el menú):\n1. Sube este archivo a netlify.drop o GitHub Pages.\n2. Abre el enlace generado.\n3. Ahora sí verás 'Instalar aplicación' en el menú.");
+            alert("Usa el menú de Chrome: 'Añadir a pantalla principal'");
         }
     }
 
-    function init() {
+    // CARGA AUTOMÁTICA DESDE LA NUBE AL INICIAR
+    async function init() {
+        // Primero cargamos lo que haya en el móvil por si no hay internet
         if(localStorage.getItem(K_DATA)) datosGuardados = JSON.parse(localStorage.getItem(K_DATA));
         if(localStorage.getItem(K_CONF)) configActual = JSON.parse(localStorage.getItem(K_CONF));
         if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
         if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
         
+        // Ahora intentamos buscar la versión de GitHub
+        try {
+            const res = await fetch(CLOUD_URL + '?t=' + Date.now()); // t=Date.now evita que se guarde en la caché vieja
+            if(res.ok) {
+                const cloudData = await res.json();
+                aplicarNuevosDatos(cloudData);
+                console.log("Datos sincronizados con la nube (GitHub)");
+            }
+        } catch (e) {
+            console.log("No se pudo conectar con GitHub. Usando datos locales.");
+        }
+
         let savedStart = localStorage.getItem(K_START);
         if(!savedStart) savedStart = "2026-01-01";
         document.getElementById('cycleStartDate').value = savedStart;
         document.getElementById('applyYear').value = fechaActual.getFullYear();
         
         if(!configActual.pagaExtra) configActual.pagaExtra = configActual.salario;
-        if(configActual.bolsa === undefined) configActual.bolsa = 0;
-
         renderCalendario();
         
         if ('serviceWorker' in navigator) {
-            const swContent = "self.addEventListener('install', (e) => { console.log('SW Installed'); }); self.addEventListener('fetch', (e) => {});";
+            const swContent = "self.addEventListener('install', (e) => {}); self.addEventListener('fetch', (e) => {});";
             const blob = new Blob([swContent], {type: 'text/javascript'});
             const swUrl = URL.createObjectURL(blob);
             navigator.serviceWorker.register(swUrl).catch(console.log);
         }
+    }
+
+    function aplicarNuevosDatos(p) {
+        if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
+        if(p.config) configActual = p.config; else if(p.c) configActual = p.c;
+        if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
+        if(p.patron) patronPlano = p.patron;
+        if(p.start) localStorage.setItem(K_START, p.start);
+        
+        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+        localStorage.setItem(K_CONF, JSON.stringify(configActual));
+        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
+        localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
     }
 
     function abrirExtraModal() {
@@ -439,11 +456,8 @@
     function renderCalendario() {
         const y = fechaActual.getFullYear(), m = fechaActual.getMonth();
         const hoy = new Date();
-        
-        // MODIFICACIÓN: Quitar el " DE " del título
-        let tituloFormateado = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
-        tituloFormateado = tituloFormateado.replace(' DE ', ' ');
-        document.getElementById('mesTitulo').innerText = tituloFormateado;
+        let tit = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
+        document.getElementById('mesTitulo').innerText = tit.replace(' DE ', ' ');
         
         const primerDia = new Date(y, m, 1).getDay();
         const esp = primerDia === 0 ? 6 : primerDia - 1;
@@ -674,8 +688,7 @@
         document.getElementById('confDeduccion').value = configActual.deduccion;
         document.getElementById('confBolsa').value = configActual.bolsa;
         renderEditorGrid();
-        const year = parseInt(document.getElementById('applyYear').value) || new Date().getFullYear();
-        calcularAnuales(year); 
+        calcularAnuales(fechaActual.getFullYear()); 
     }
     function cerrarConfig() { document.getElementById('configModal').style.display='none'; }
     function guardarConfig() {
@@ -711,19 +724,7 @@
         r.onload = e => {
             try {
                 const p = JSON.parse(e.target.result);
-                if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
-                if(p.config) configActual = p.config; else if(p.c) configActual = p.c;
-                if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
-                if(p.patron) patronPlano = p.patron;
-                if(p.start) localStorage.setItem(K_START, p.start);
-
-                if(!configActual.pagaExtra) configActual.pagaExtra = configActual.salario;
-                
-                localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
-                localStorage.setItem(K_CONF, JSON.stringify(configActual));
-                localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
-                localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
-                
+                aplicarNuevosDatos(p);
                 renderCalendario(); cerrarConfig(); alert("Datos cargados correctamente.");
             } catch(err) {
                 alert("Error al leer archivo.");
