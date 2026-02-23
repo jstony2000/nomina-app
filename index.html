@@ -32,12 +32,11 @@
             background-color: var(--bg-body); border-left: 1px solid #222; border-right: 1px solid #222;
         }
 
-        /* CABECERA */
         .header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.5rem 1rem; background: var(--bg-panel); border-bottom: 1px solid #333; flex-shrink: 0; height: 60px;
         }
-        h2 { margin: 0; color: #fff; text-transform: uppercase; font-weight: 900; font-size: clamp(1.2rem, 5vw, 1.8rem); }
+        h2 { margin: 0; color: #fff; text-transform: uppercase; font-weight: 900; font-size: clamp(1.2rem, 5vw, 1.8rem); cursor:pointer;}
         .btn-nav, .btn-config {
             background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
@@ -45,11 +44,15 @@
         .btn-nav { font-size: 1.5rem; font-weight: 900; }
         .btn-config { font-size: 1.2rem; margin-left: 8px; }
 
-        /* CONTENEDORES PRINCIPALES */
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
             background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center;
         }
+        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
+        .stat-item:last-child { border-right: none; }
+        .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; color: #888; }
+        .stat-val { font-size: 0.85rem; color: #fff; }
+
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         .week-days {
             display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
@@ -58,13 +61,12 @@
         }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 5px; }
         .day-cell {
-            background-color: var(--color-descanso); min-height: 70px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px;
+            background-color: var(--color-descanso); min-height: 75px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; position: relative;
         }
-        .day-num { font-size: 1.4rem; font-weight: 900; color: #666; }
-        .day-label { font-size: 0.6rem; font-weight: 900; color: #444; text-transform: uppercase;}
+        .day-num { font-size: 1.4rem; font-weight: 900; color: #666; line-height: 1; }
+        .day-label { font-size: 0.55rem; font-weight: 900; color: #444; text-transform: uppercase; margin-top: 4px;}
         
-        /* ESTADOS */
         .day-cell.noche { background-color: var(--color-noche); }
         .day-cell.noche .day-num, .day-cell.noche .day-label { color: #fff; }
         .day-cell.festivo { background-color: var(--color-festivo); }
@@ -74,34 +76,39 @@
         .day-cell.adecuacion { background-color: var(--color-adecuacion); }
         .day-cell.today { border: 2px solid #fff; box-shadow: 0 0 10px var(--color-adecuacion); }
 
-        /* PANEL RESUMEN DISCRETO */
+        .badge-extra { position: absolute; top: 2px; right: 3px; background: var(--color-extra); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 3px; border-radius: 3px; }
+
+        .leyenda { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px; background: #080808; border-top: 1px solid #222; flex-shrink: 0; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
+
         .resumen-panel {
             background: var(--bg-panel); border-top: 1px solid #333; padding: 12px; flex-shrink: 0;
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;
         }
-        .res-box { display: flex; flex-direction: column; gap: 2px; }
-        .res-lab { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 900; }
-        .res-val { font-size: 1.2rem; font-weight: 900; color: #fff; }
+        .res-box { display: flex; flex-direction: column; }
+        .res-lab { font-size: 0.55rem; color: #666; text-transform: uppercase; font-weight: 900; margin-bottom: 2px; }
+        .res-val { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .btn-add-horas-main { grid-column: 1 / -1; background: #222; color: var(--color-extra); border: 1px solid #444; padding: 8px; border-radius: 6px; font-weight: 900; margin-top: 8px; cursor: pointer; text-transform: uppercase; font-size: 0.75rem;}
 
-        /* MODO HORIZONTAL (LANDSCAPE) */
+        /* MODALES */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
+        .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 20px;}
+        .config-row { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .config-row label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #aaa; }
+        .config-row input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px; font-weight: bold;}
+        .tabs { display: flex; gap: 2px; margin-bottom: 15px; border-bottom: 1px solid #333;}
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; background: #222; font-size: 0.65rem; font-weight: bold; border-radius: 5px 5px 0 0;}
+        .tab.active { background: #1e1e1e; color: var(--color-noche); border-bottom: 2px solid var(--color-noche); }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+
+        .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: monospace; }
+        .nom-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+
+        /* MODO HORIZONTAL (LANDSCAPE) - OCULTA TODO EXCEPTO CALENDARIO */
         @media (orientation: landscape) {
-            .mini-stats, .leyenda, .resumen-panel, .btn-add-horas-main { display: none !important; }
+            .mini-stats, .leyenda, .resumen-panel { display: none !important; }
             #app-container { max-width: 100%; }
             .day-cell { min-height: 100px; }
         }
-
-        /* ESTILOS MODALES Y OTROS (Igual que V22) */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
-        .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 20px;}
-        .tabs { display: flex; gap: 2px; margin-bottom: 15px; border-bottom: 1px solid #333;}
-        .tab { flex: 1; padding: 8px; text-align: center; cursor: pointer; background: #222; font-size: 0.7rem; font-weight: bold;}
-        .tab.active { background: #1e1e1e; color: var(--color-noche); border-bottom: 2px solid var(--color-noche); }
-        .tab-content { display: none; } .tab-content.active { display: block; }
-        .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: monospace; }
-        .btn-save { width: 100%; background: var(--color-noche); color: #fff; padding: 12px; border: none; font-weight: bold; border-radius: 8px; margin-top: 10px; cursor: pointer;}
-        .config-row { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
-        .config-row input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px; }
-        .btn-add-horas-main { grid-column: 1 / -1; background: #222; color: var(--color-extra); border: 1px solid #444; padding: 8px; border-radius: 6px; font-weight: 900; margin-top: 8px; cursor: pointer;}
     </style>
 </head>
 <body>
@@ -120,10 +127,10 @@
         <div class="mini-stats">
             <div class="stat-item"><span class="stat-label">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
             <div class="stat-item"><span class="stat-label" style="color:var(--color-extra)">EXTRAS</span><span class="stat-val" id="statHorasExtra">0h</span></div>
-            <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
             <div class="stat-item"><span class="stat-label">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
             <div class="stat-item"><span class="stat-label">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
             <div class="stat-item"><span class="stat-label">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
         </div>
 
         <div class="calendar-container">
@@ -133,14 +140,12 @@
             <div class="calendar-grid" id="diasContainer"></div>
         </div>
 
-        <div class="leyenda" id="leyendaMain">
-            <div style="font-size:0.6rem; display:flex; gap:8px;">
-                <span><b style="color:var(--color-noche)">●</b> NOCHE</span>
-                <span><b style="color:var(--color-festivo)">●</b> FESTIVO</span>
-                <span><b style="color:var(--color-vacaciones)">●</b> VACAS</span>
-                <span><b style="color:var(--color-convenio)">●</b> CONV</span>
-                <span><b style="color:var(--color-adecuacion)">●</b> ADEC</span>
-            </div>
+        <div class="leyenda">
+            <span><b style="color:var(--color-noche)">●</b> NOCHE</span>
+            <span><b style="color:var(--color-festivo)">●</b> FEST</span>
+            <span><b style="color:var(--color-vacaciones)">●</b> VAC</span>
+            <span><b style="color:var(--color-convenio)">●</b> CONV</span>
+            <span><b style="color:var(--color-adecuacion)">●</b> ADEC</span>
         </div>
 
         <div class="resumen-panel">
@@ -148,7 +153,7 @@
             <div class="res-box"><span class="res-lab" style="color:var(--color-noche)">NOCHES</span><span class="res-val" id="resNoches">0</span></div>
             <div class="res-box"><span class="res-lab" style="color:var(--color-festivo)">FESTIVOS</span><span class="res-val" id="resFestivos">0</span></div>
             <div class="res-box"><span class="res-lab">LIBRES</span><span class="res-val" id="resLibres">0</span></div>
-            <button class="btn-add-horas-main" onclick="abrirExtraModal()">⏱️ AÑADIR HORAS EXTRA (DÍA)</button>
+            <button class="btn-add-horas-main" onclick="abrirExtraModal()">⏱️ ANOTAR HORAS EXTRA</button>
         </div>
     </div>
 
@@ -163,183 +168,12 @@
             </div>
 
             <div id="tab-nomina" class="tab-content active">
-                <select id="nominaMonthSelector" style="width:100%; padding:10px; margin-bottom:10px;" onchange="renderNominaDetallada()"></select>
+                <select id="nominaMonthSelector" style="width:100%; padding:10px; margin-bottom:10px; background:#333; color:#fff; border:1px solid #555;" onchange="renderNominaDetallada()"></select>
                 <div class="nomina-sheet">
-                    <div id="nominaBody" style="font-size:0.8rem;"></div>
-                    <hr>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem; color:#d32f2f;">
+                    <div id="nominaBody"></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem; color:#d32f2f; margin-top:10px; border-top:2px solid #000; padding-top:10px;">
                         <span>NETO ESTIMADO:</span><span id="nomNeto">0,00 €</span>
                     </div>
                 </div>
-                <div class="total-anual-box" style="background:#000; padding:10px; margin-top:10px; border-radius:8px; text-align:center;">
-                    <span style="font-size:0.7rem; color:#666;">BRUTO ANUAL ESTIMADO</span>
-                    <div id="statTotalEurosConfig" style="font-size:1.5rem; color:var(--color-total); font-weight:900;">0€</div>
-                </div>
-            </div>
 
-            <div id="tab-precios" class="tab-content">
-                <div class="config-row"><label>Salario Base:</label><input type="number" id="confSalario" step="0.01"></div>
-                <div class="config-row"><label>Hora Noche:</label><input type="number" id="confNoche" step="0.0001"></div>
-                <div class="config-row"><label>Festivo:</label><input type="number" id="confFestivo" step="0.0001"></div>
-                <div class="config-row"><label>% Deducción:</label><input type="number" id="confDeduccion" step="0.001"></div>
-                <button class="btn-save" onclick="guardarConfig()">GUARDAR</button>
-            </div>
-            </div>
-    </div>
-
-    <div id="extraModal" class="modal">
-        <div class="modal-content">
-            <h3>ANOTAR HORAS EXTRA</h3>
-            <input type="date" id="inputExtraFecha" style="width:100%; padding:10px; margin-bottom:10px;">
-            <input type="number" id="inputExtraValor" placeholder="Horas" style="width:100%; padding:10px; margin-bottom:10px;">
-            <button class="btn-save" onclick="guardarExtraDia()">GUARDAR</button>
-            <button class="btn-save" style="background:#444;" onclick="cerrarExtraModal()">CANCELAR</button>
-        </div>
-    </div>
-
-<script>
-    const K_DATA = 'nomina_stellantis_universal_data_v3'; 
-    const K_CONF = 'nomina_stellantis_universal_config_v4';
-    const K_EXTR = 'nomina_stellantis_universal_extras_diarias_v1';
-    const K_PATRON = 'nomina_stellantis_universal_patron_v3';
-    const K_START = 'nomina_stellantis_universal_start_v3';
-    const CLOUD_URL = 'https://jstony2000.github.io/nomina-app/nomina_backup.json';
-
-    let fechaActual = new Date(); 
-    let datosGuardados = {}; 
-    let horasExtra = {}; 
-    let patronPlano = new Array(42).fill(0);
-    let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0 };
-
-    async function init() {
-        if(localStorage.getItem(K_DATA)) datosGuardados = JSON.parse(localStorage.getItem(K_DATA));
-        if(localStorage.getItem(K_CONF)) configActual = JSON.parse(localStorage.getItem(K_CONF));
-        if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
-        if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
-        
-        try {
-            const res = await fetch(CLOUD_URL + '?t=' + Date.now());
-            if(res.ok) { const cloudData = await res.json(); aplicarNuevosDatos(cloudData); }
-        } catch (e) { console.log("Offline mode"); }
-
-        renderCalendario();
-    }
-
-    function aplicarNuevosDatos(p) {
-        if(p.data) datosGuardados = p.data;
-        if(p.config) configActual = p.config;
-        if(p.extras) horasExtra = p.extras;
-        if(p.patron) patronPlano = p.patron;
-        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
-        localStorage.setItem(K_CONF, JSON.stringify(configActual));
-    }
-
-    function renderCalendario() {
-        const y = fechaActual.getFullYear(), m = fechaActual.getMonth();
-        let tit = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
-        document.getElementById('mesTitulo').innerText = tit.replace(' DE ', ' ');
-        
-        const primerDia = new Date(y, m, 1).getDay();
-        const esp = (primerDia === 0 ? 6 : primerDia - 1);
-        const totalDias = new Date(y, m + 1, 0).getDate();
-        
-        const c = document.getElementById('diasContainer'); c.innerHTML = '';
-        for(let i=0; i<esp; i++) c.innerHTML += '<div class="day-cell" style="visibility:hidden"></div>';
-        
-        let cT=0, cN=0, cF=0, cV=0, cC=0, cA=0;
-        for (let d = 1; d <= totalDias; d++) {
-            const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const est = datosGuardados[k] || 0;
-            let cls='', txt='LIBRE';
-            if(est===1) { cls='noche'; txt='NOCHE'; cN++; cT++; }
-            else if(est===2) { cls='festivo'; txt='FESTIVO'; cN++; cF++; cT++; }
-            else if(est===3) { cls='vacaciones'; txt='VACAS'; cV++; }
-            else if(est===4) { cls='convenio'; txt='CONV'; cC++; }
-            else if(est===5) { cls='adecuacion'; txt='ADEC'; cA++; }
-            
-            const div = document.createElement('div');
-            div.className = `day-cell ${cls}`;
-            if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
-            div.innerHTML += `<div class="day-num">${d}</div><div class="day-label">${txt}</div>`;
-            div.onclick = () => toggleDia(d);
-            c.appendChild(div);
-        }
-        
-        // Actualizar resumen de conteo (Principal)
-        document.getElementById('resTrabajados').innerText = cT;
-        document.getElementById('resNoches').innerText = cN;
-        document.getElementById('resFestivos').innerText = cF;
-        document.getElementById('resLibres').innerText = (totalDias - cT - cV - cC - cA);
-
-        // Actualizar estadísticas superiores
-        document.getElementById('statVacaciones').innerText = cV;
-        document.getElementById('statConvenio').innerText = cC;
-        document.getElementById('statAdecuacion').innerText = cA;
-        calcularGlobales(y);
-    }
-
-    function toggleDia(d) {
-        const k = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 6;
-        if(datosGuardados[k] === 0) delete datosGuardados[k];
-        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
-        renderCalendario();
-    }
-
-    function calcularGlobales(year) {
-        let diasT=0, hExtraAnual=0;
-        for(const [k,est] of Object.entries(datosGuardados)) {
-            if(k.startsWith(year)) if(est===1 || est===2) diasT++;
-        }
-        for(const [k,val] of Object.entries(horasExtra)) {
-            if(k.startsWith(year)) hExtraAnual += val;
-        }
-        document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hExtraAnual).toFixed(1) + "h";
-        document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
-    }
-
-    function renderNominaDetallada() {
-        const selVal = document.getElementById('nominaMonthSelector').value; 
-        const [y, m] = selVal.split('-').map(Number);
-        let cN=0, cF=0, days = new Date(y, m, 0).getDate();
-        
-        for(let d=1; d<=days; d++) {
-            let k = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            if(datosGuardados[k]===1) cN++; 
-            if(datosGuardados[k]===2) { cN++; cF++; }
-        }
-
-        let bruto = configActual.salario + (cN * 7.75 * configActual.noche) + (cN * 3.875 * configActual.garantia) + (cF * 7.75 * configActual.festivo);
-        if(m===6 || m===12) bruto += configActual.pagaExtra;
-        
-        document.getElementById('nominaBody').innerHTML = `
-            <div style="display:flex; justify-content:space-between"><span>Salario Base:</span><span>${configActual.salario.toFixed(2)}€</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Noches (${cN}):</span><span>${(cN*7.75*configActual.noche).toFixed(2)}€</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Festivos (${cF}):</span><span>${(cF*7.75*configActual.festivo).toFixed(2)}€</span></div>
-        `;
-        document.getElementById('nomNeto').innerText = (bruto * (1 - configActual.deduccion)).toFixed(2) + " €";
-    }
-
-    function abrirConfig() { document.getElementById('configModal').style.display='flex'; initMonthSelector(); }
-    function cerrarConfig() { document.getElementById('configModal').style.display='none'; }
-    function switchTab(id) {
-        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-        document.getElementById(id).classList.add('active');
-        if(id==='tab-nomina') renderNominaDetallada();
-    }
-
-    function initMonthSelector() {
-        const sel = document.getElementById('nominaMonthSelector');
-        sel.innerHTML = "";
-        for(let i=0; i<12; i++) {
-            let opt = document.createElement('option');
-            opt.value = `2026-${String(i+1).padStart(2,'0')}`;
-            opt.text = new Date(2026, i).toLocaleDateString('es-ES',{month:'long'}).toUpperCase();
-            sel.appendChild(opt);
-        }
-        sel.value = `2026-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
-    }
-
-    function cambiarMes(d) { fechaActual.setMonth(fechaActual.getMonth()+d); renderCalendario(); }
-    func
+                
