@@ -69,7 +69,7 @@
         .day-name-full { display: none; } .day-name-short { display: block; }
         @media (min-width: 450px) { .day-name-full { display: block; } .day-name-short { display: none; } }
 
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 5px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 5px; flex-grow: 1;}
         .day-cell {
             background-color: var(--color-descanso); min-height: 72px;
             display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; position: relative;
@@ -113,7 +113,7 @@
         .tab-content { display: none; } .tab-content.active { display: block; }
         .btn-save { width: 100%; background: var(--color-noche); color: #fff; padding: 12px; border: none; font-weight: bold; border-radius: 8px; margin-top: 10px; cursor: pointer; text-transform: uppercase;}
         
-        /* NÓMINA DETALLADA V22 (RESTAURADA) */
+        /* NÓMINA DETALLADA V22 */
         .nomina-sheet { background: #fff; color: #000; padding: 15px; border-radius: 4px; margin-top: 10px; font-family: "Courier New", Courier, monospace; border: 1px solid #ccc; }
         .nomina-header { text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; text-transform: uppercase; }
         .nomina-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -123,7 +123,7 @@
         .nomina-table td:first-child { text-align: left; font-weight: bold; }
         .nom-row-total { display: flex; justify-content: space-between; font-size: 0.9rem; }
 
-        /* EDITOR PATRÓN MODIFICADO */
+        /* EDITOR PATRÓN */
         .pattern-editor { border: 1px solid #444; padding: 5px; border-radius: 8px; background: #111; margin-bottom: 15px;}
         .pattern-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #333; border: 1px solid #444; border-radius: 4px; overflow: hidden;}
         .p-head { background: #000; color: #888; text-align: center; font-size: 0.65rem; padding: 4px 0; }
@@ -136,10 +136,22 @@
         .btn-data { background: #333; color: #fff; border: 1px solid #555; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px;}
         .btn-data.save { background: var(--color-adecuacion); color: #000; border: none; }
 
-        /* MODO HORIZONTAL (LANDSCAPE) MODIFICADO PARA NO OCULTAR PANELES */
+        /* MODO HORIZONTAL OPTIMIZADO PARA PANTALLA COMPLETA */
         @media (orientation: landscape) {
+            /* Ocultamos paneles estáticos para que el calendario ocupe todo */
+            .mini-stats, .leyenda, .resumen-panel { display: none !important; }
             #app-container { max-width: 100%; }
-            .day-cell { min-height: 80px; } 
+            /* Hacemos la cabecera más estrecha */
+            .header { height: 45px; padding: 0 1rem; }
+            .btn-nav, .btn-config { width: 30px; height: 30px; font-size: 1rem;}
+            h2 { font-size: 1.1rem; }
+            /* Ajustamos la cuadrícula para que no tenga scroll y encaje perfecto */
+            .calendar-container { overflow: hidden; }
+            .week-days { padding: 4px 0 2px 0; font-size: 0.65rem; }
+            .calendar-grid { gap: 2px; padding: 2px; }
+            .day-cell { min-height: 0; height: auto; } 
+            .day-num { font-size: 1rem; }
+            .day-label { font-size: 0.45rem; margin-top: 2px;}
         }
     </style>
 </head>
@@ -292,7 +304,7 @@
         document.getElementById('applyYear').value = fechaActual.getFullYear();
         renderCalendario();
 
-        // SERVICE WORKER MODIFICADO PARA AUTO-ACTUALIZACIÓN
+        // SERVICE WORKER MODIFICADO PARA AUTO-ACTUALIZACIÓN SILENCIOSA
         if ('serviceWorker' in navigator) {
             const swContent = "self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); }); self.addEventListener('fetch', (e) => {});";
             const blob = new Blob([swContent], {type: 'text/javascript'});
