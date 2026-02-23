@@ -48,20 +48,23 @@
         /* MINI STATS PRINCIPAL */
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
-            background: #000; border-bottom: 1px solid #222; font-size: 0.65rem; flex-shrink: 0; text-align: center;
+            background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center;
         }
-        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; }
+        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
         .stat-item:last-child { border-right: none; }
-        .stat-label { font-size: 0.45rem; margin-bottom: 2px; color: #777; text-transform: uppercase; }
-        .stat-val { font-size: 0.85rem; color: #fff; }
+        .stat-label { font-size: 0.5rem; margin-bottom: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .stat-val { font-size: 0.9rem; color: #fff; line-height: 1; }
 
         /* CALENDARIO */
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         .week-days {
             display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
-            color: #666; font-weight: 900; padding: 10px 0 5px 0; background: #000; font-size: 0.7rem;
+            color: #666; font-weight: 900; padding: 10px 0 5px 0; background: #000; font-size: 0.75rem;
             position: sticky; top: 0; z-index: 10;
         }
+        .day-name-full { display: none; } .day-name-short { display: block; }
+        @media (min-width: 450px) { .day-name-full { display: block; } .day-name-short { display: none; } }
+
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 5px; }
         .day-cell {
             background-color: var(--color-descanso); min-height: 72px;
@@ -81,7 +84,7 @@
         .badge-extra { position: absolute; top: 2px; right: 3px; background: var(--color-extra); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 3px; border-radius: 3px; }
 
         /* LEYENDA */
-        .leyenda { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px; background: #080808; border-top: 1px solid #222; flex-shrink: 0; font-size: 0.6rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        .leyenda { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px; background: #080808; border-top: 1px solid #222; flex-shrink: 0; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
 
         /* PANEL RESUMEN DISCRETO */
         .resumen-panel {
@@ -152,15 +155,21 @@
         <div class="mini-stats">
             <div class="stat-item"><span class="stat-label">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
             <div class="stat-item"><span class="stat-label" style="color:var(--color-extra)">EXTRAS</span><span class="stat-val" id="statHorasExtra">0h</span></div>
-            <div class="stat-item"><span class="stat-label">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
-            <div class="stat-item"><span class="stat-label">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
-            <div class="stat-item"><span class="stat-label">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
             <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-noche)">DÍAS T.</span><span class="stat-val" id="statDiasTrabajados">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-convenio)">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-adecuacion)">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
         </div>
 
         <div class="calendar-container">
             <div class="week-days">
-                <div>LUN</div><div>MAR</div><div>MIE</div><div>JUE</div><div>VIE</div><div>SAB</div><div>DOM</div>
+                <div><span class="day-name-full">LUNES</span><span class="day-name-short">LUN</span></div>
+                <div><span class="day-name-full">MARTES</span><span class="day-name-short">MAR</span></div>
+                <div><span class="day-name-full">MIERCOLES</span><span class="day-name-short">MIE</span></div>
+                <div><span class="day-name-full">JUEVES</span><span class="day-name-short">JUE</span></div>
+                <div><span class="day-name-full">VIERNES</span><span class="day-name-short">VIE</span></div>
+                <div><span class="day-name-full">SABADO</span><span class="day-name-short">SAB</span></div>
+                <div><span class="day-name-full">DOMINGO</span><span class="day-name-short">DOM</span></div>
             </div>
             <div class="calendar-grid" id="diasContainer"></div>
         </div>
@@ -206,7 +215,7 @@
                 </div>
                 <div style="background:#000; padding:15px; margin-top:12px; border-radius:8px; text-align:center; border: 1px solid #333;">
                     <span style="font-size:0.65rem; color:#666; text-transform:uppercase; letter-spacing:1px;">Bruto Anual Estimado</span>
-                    <div id="statTotalEurosConfig" style="font-size:1.8rem; color:var(--color-total); font-weight:900;">0€</div>
+                    <div id="statTotalEurosConfig" style="font-size:1.8rem; color:var(--color-total); font-weight:900;">0 €</div>
                 </div>
             </div>
 
@@ -277,10 +286,13 @@
     }
 
     function aplicarNuevosDatos(p) {
-        if(p.data) datosGuardados = p.data; if(p.config) configActual = p.config;
-        if(p.extras) horasExtra = p.extras; if(p.patron) patronPlano = p.patron;
+        if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
+        if(p.config) configActual = p.config; else if(p.c) configActual = p.c;
+        if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
+        if(p.patron) patronPlano = p.patron;
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
         localStorage.setItem(K_CONF, JSON.stringify(configActual));
+        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
     }
 
     function renderCalendario() {
@@ -320,7 +332,6 @@
         document.getElementById('resNoches').innerText = cN;
         document.getElementById('resFestivos').innerText = cF;
         document.getElementById('resLibres').innerText = (totalDias - cT - cV - cC - cA);
-        document.getElementById('statVacaciones').innerText = cV;
         document.getElementById('statConvenio').innerText = cC;
         document.getElementById('statAdecuacion').innerText = cA;
         document.getElementById('statBolsa').innerText = configActual.bolsa.toFixed(1) + "h";
@@ -346,13 +357,13 @@
         let b = configActual.salario, n = cN * 7.75 * configActual.noche, g = cN * 3.875 * configActual.garantia, f = cF * 7.75 * configActual.festivo;
         let totalB = b + n + g + f; if(m===6 || m===12) totalB += configActual.pagaExtra;
         document.getElementById('nominaBody').innerHTML = `
-            <tr><td>Sueldo Base</td><td>30.00</td><td>-</td><td>${b.toFixed(2)}€</td></tr>
-            <tr><td>Plus Noche</td><td>${(cN*7.75).toFixed(1)}h</td><td>${configActual.noche.toFixed(4)}</td><td>${n.toFixed(2)}€</td></tr>
-            <tr><td>Garantía</td><td>${(cN*3.875).toFixed(1)}h</td><td>${configActual.garantia.toFixed(4)}</td><td>${g.toFixed(2)}€</td></tr>
-            <tr><td>Festivos</td><td>${(cF*7.75).toFixed(1)}h</td><td>${configActual.festivo.toFixed(4)}</td><td>${f.toFixed(2)}€</td></tr>
-            ${(m===6||m===12)? `<tr style="color:green"><td>Paga Extra</td><td>1.0</td><td>-</td><td>${configActual.pagaExtra.toFixed(2)}€</td></tr>`:''}
+            <tr><td>Sueldo Base</td><td>30.00</td><td>-</td><td>${b.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</td></tr>
+            <tr><td>Plus Noche</td><td>${(cN*7.75).toFixed(1)}h</td><td>${configActual.noche.toFixed(4)}</td><td>${n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</td></tr>
+            <tr><td>Garantía</td><td>${(cN*3.875).toFixed(1)}h</td><td>${configActual.garantia.toFixed(4)}</td><td>${g.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</td></tr>
+            <tr><td>Festivos</td><td>${(cF*7.75).toFixed(1)}h</td><td>${configActual.festivo.toFixed(4)}</td><td>${f.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</td></tr>
+            ${(m===6||m===12)? `<tr style="color:green"><td>Paga Extra</td><td>1.0</td><td>-</td><td>${configActual.pagaExtra.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</td></tr>`:''}
         `;
-        document.getElementById('nomNeto').innerText = (totalB * (1 - configActual.deduccion)).toFixed(2) + " €";
+        document.getElementById('nomNeto').innerText = (totalB * (1 - configActual.deduccion)).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
     }
 
     function renderEditorGrid() {
@@ -386,10 +397,11 @@
         let n=0, f=0, diasT=0, hEx=0;
         for(const [k,est] of Object.entries(datosGuardados)) { if(k.startsWith(year)) { if(est===1||est===2) { diasT++; n++; } if(est===2) f++; } }
         for(const [k,v] of Object.entries(horasExtra)) { if(k.startsWith(year)) hEx += v; }
+        document.getElementById('statDiasTrabajados').innerText = diasT;
         document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hEx).toFixed(1) + "h";
         document.getElementById('statHorasExtra').innerText = hEx.toFixed(1) + "h";
         let ba = (configActual.salario * 12) + (configActual.pagaExtra * 2) + (n * 7.75 * configActual.noche) + (n * 3.875 * configActual.garantia) + (f * 7.75 * configActual.festivo);
-        document.getElementById('statTotalEurosConfig').innerText = Math.round(ba).toLocaleString() + "€";
+        document.getElementById('statTotalEurosConfig').innerText = Math.round(ba).toLocaleString('es-ES') + " €";
     }
 
     function abrirConfig() { document.getElementById('configModal').style.display='flex'; document.getElementById('confSalario').value = configActual.salario; document.getElementById('confPagaExtra').value = configActual.pagaExtra; document.getElementById('confNoche').value = configActual.noche; document.getElementById('confGarantia').value = configActual.garantia; document.getElementById('confFestivo').value = configActual.festivo; document.getElementById('confDeduccion').value = configActual.deduccion; document.getElementById('confBolsa').value = configActual.bolsa; initMonthSelector(); renderEditorGrid(); renderNominaDetallada(); }
