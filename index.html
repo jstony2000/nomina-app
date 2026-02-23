@@ -129,7 +129,6 @@
         .btn-data.force-update { background: #00b0ff; color: #000; border: none; font-size: 0.8rem; margin-top: 15px;}
 
         @media (orientation: landscape) {
-            .mini-stats, .leyenda, .resumen-panel { display: none !important; }
             #app-container { max-width: 100%; }
             .header { height: 45px; padding: 0 1rem; }
             .btn-nav, .btn-config { width: 30px; height: 30px; font-size: 1rem;}
@@ -256,6 +255,8 @@
                     
                     <button class="btn-data force-update" onclick="forzarActualizacion()">🔄 ACTUALIZAR APP (DESDE GITHUB)</button>
                     <span class="help-text" style="text-align:center; display:block;">Púlsalo si has subido código nuevo y no aparece.</span>
+                    
+                    <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444; font-weight:bold;">V26.1 PRO FINAL</div>
                 </div>
             </div>
         </div>
@@ -467,7 +468,6 @@
     function irAHoy() { fechaActual = new Date(); renderCalendario(); }
     function resetearCalendario() { const y = document.getElementById('applyYear').value; if(confirm(`¿Borrarás todos los turnos introducidos del año ${y}?`)) { for(let k in datosGuardados) if(k.startsWith(y)) delete datosGuardados[k]; localStorage.setItem(K_DATA, JSON.stringify(datosGuardados)); renderCalendario(); } }
 
-    // FUNCIÓN PARA DESTRUIR CACHÉ Y FORZAR ACTUALIZACIÓN
     function forzarActualizacion() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
