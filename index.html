@@ -439,7 +439,11 @@
     function renderCalendario() {
         const y = fechaActual.getFullYear(), m = fechaActual.getMonth();
         const hoy = new Date();
-        document.getElementById('mesTitulo').innerText = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
+        
+        // MODIFICACIÓN: Quitar el " DE " del título
+        let tituloFormateado = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
+        tituloFormateado = tituloFormateado.replace(' DE ', ' ');
+        document.getElementById('mesTitulo').innerText = tituloFormateado;
         
         const primerDia = new Date(y, m, 1).getDay();
         const esp = primerDia === 0 ? 6 : primerDia - 1;
@@ -731,5 +735,4 @@
     init();
 </script>
 </body>
-
 </html>
