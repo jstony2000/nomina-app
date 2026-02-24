@@ -45,6 +45,7 @@
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
             background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center; gap: 2px;
+            position: relative;
         }
         .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
         .stat-item:last-child { border-right: none; }
@@ -300,7 +301,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V29 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V30 PC READY</div>
             </div>
         </div>
     </div>
@@ -486,16 +487,19 @@
         const c = document.getElementById('diasContainer'); c.innerHTML = '';
         for(let i=0; i<esp; i++) c.innerHTML += '<div class="day-cell empty" style="visibility:hidden"></div>';
         
-        let cT=0, cN=0, cF=0, cV=0, cC=0, cA=0;
+        let cT=0, cN=0, cF=0;
+        // Se ha retirado el recuento de cV, cC y cA de aquí porque ahora son variables anuales
         for (let d = 1; d <= totalDias; d++) {
             const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const est = datosGuardados[k] || 0;
             let cls='', txt='LIBRE';
+            
+            // Sumamos a los contadores del mes visualizado en el panel inferior
             if(est===1) { cls='noche'; txt='NOCHE'; cN++; cT++; }
             else if(est===2) { cls='festivo'; txt='FESTIVO'; cN++; cF++; cT++; }
-            else if(est===3) { cls='vacaciones'; txt='VACAS'; cV++; }
-            else if(est===4) { cls='convenio'; txt='CONV'; cC++; }
-            else if(est===5) { cls='adecuacion'; txt='ADEC'; cA++; }
+            else if(est===3) { cls='vacaciones'; txt='VACAS'; }
+            else if(est===4) { cls='convenio'; txt='CONV'; }
+            else if(est===5) { cls='adecuacion'; txt='ADEC'; }
             
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
@@ -509,11 +513,11 @@
         document.getElementById('resTrabajados').innerText = cT;
         document.getElementById('resNoches').innerText = cN;
         document.getElementById('resFestivos').innerText = cF;
-        document.getElementById('resLibres').innerText = (totalDias - cT - cV - cC - cA);
-        document.getElementById('statVacaciones').innerText = cV;
-        document.getElementById('statConvenio').innerText = cC;
-        document.getElementById('statAdecuacion').innerText = cA;
+        // En el resumen mensual, el resto de días son libres (asumiendo que vacaciones/convenio/adecuación también son "días no trabajados")
+        document.getElementById('resLibres').innerText = totalDias - cT;
+        
         document.getElementById('statBolsa').innerText = (configActual.bolsa || 0).toFixed(1) + "h";
+        
         calcularGlobales(y);
     }
 
@@ -527,17 +531,27 @@
 
     function calcularGlobales(year) {
         let diasT=0, hExtraAnual=0, nochesAnuales=0, festivosAnuales=0;
+        let cVacAnual=0, cConvAnual=0, cAdecAnual=0;
+
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
                 if(est===1 || est===2) { diasT++; nochesAnuales++; }
                 if(est===2) festivosAnuales++;
+                if(est===3) cVacAnual++;
+                if(est===4) cConvAnual++;
+                if(est===5) cAdecAnual++;
             }
         }
         for(const [k,val] of Object.entries(horasExtra)) {
             if(k.startsWith(year)) hExtraAnual += val;
         }
+        
+        // Asignación unificada de datos anuales a los mini-stats superiores
         document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hExtraAnual).toFixed(1) + "h";
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
+        document.getElementById('statVacaciones').innerText = cVacAnual;
+        document.getElementById('statConvenio').innerText = cConvAnual;
+        document.getElementById('statAdecuacion').innerText = cAdecAnual;
 
         let brutoAnual = (configActual.salario * 12) + (configActual.pagaExtra * 2);
         brutoAnual += (nochesAnuales * 7.75 * configActual.noche);
