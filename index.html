@@ -47,10 +47,11 @@
             background: #000; border-bottom: 1px solid #222; font-size: 0.7rem; flex-shrink: 0; text-align: center; gap: 2px;
             position: relative;
         }
-        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
+        .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 48px;}
         .stat-item:last-child { border-right: none; }
-        .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; }
-        .stat-val { font-size: 0.85rem; color: #fff; }
+        .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+        .stat-label span.sub { font-size: 0.35rem; color: #888; }
+        .stat-val { font-size: 0.85rem; color: #fff; margin-top: 2px; }
         
         /* Modificadores dinámicos de botones superiores */
         .stat-btn-extra { background: rgba(255, 145, 0, 0.15); border: 1px dashed rgba(255, 145, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
@@ -61,6 +62,8 @@
         .stat-btn-adecuacion:active { background: rgba(0, 176, 255, 0.3); }
         .stat-btn-bolsa { background: rgba(255, 215, 0, 0.15); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .stat-btn-bolsa:active { background: rgba(255, 215, 0, 0.3); }
+        .stat-btn-vacaciones { background: rgba(0, 230, 118, 0.15); border: 1px dashed rgba(0, 230, 118, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .stat-btn-vacaciones:active { background: rgba(0, 230, 118, 0.3); }
 
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         
@@ -164,23 +167,29 @@
         </div>
 
         <div class="mini-stats">
-            <div class="stat-item"><span class="stat-label" style="color:#aaa;">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
+            <div class="stat-item">
+                <span class="stat-label" style="color:#aaa;">H. TRAB<span class="sub">(1720/AÑO)</span></span>
+                <span class="stat-val" id="statHorasTrabajadas">0h</span>
+            </div>
             <div class="stat-item stat-btn-extra" onclick="abrirExtraModal()" title="Pulsar para añadir o quitar horas extra">
-                <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎</span>
+                <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statHorasExtra">0h</span>
             </div>
             <div class="stat-item stat-btn-convenio" onclick="alertaProteccionEstructural('Convenio')" title="Total de días de convenio (calculado del calendario)">
-                <span class="stat-label" style="color:var(--color-convenio)">CONV ✎<span style="font-size:0.4rem; color:#888;">(2/AÑO)</span></span>
+                <span class="stat-label" style="color:var(--color-convenio)">CONV ✎<span class="sub">(2/AÑO)</span></span>
                 <span class="stat-val" id="statConvenio">0</span>
             </div>
             <div class="stat-item stat-btn-adecuacion" onclick="alertaProteccionEstructural('Adecuación')" title="Total de días de adecuación (calculado del calendario)">
-                <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎</span>
+                <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statAdecuacion">0</span>
             </div>
-            <div class="stat-item"><span class="stat-label" style="color:var(--color-vacaciones)">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
             <div class="stat-item stat-btn-bolsa" onclick="editarBolsaRapida()" title="Pulsar para modificar la Bolsa de Horas Oficial">
-                <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎</span>
+                <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statBolsa">0h</span>
+            </div>
+            <div class="stat-item stat-btn-vacaciones" onclick="alertaProteccionEstructural('Vacaciones')" title="Total de días de vacaciones (calculado del calendario)">
+                <span class="stat-label" style="color:var(--color-vacaciones)">VAC ✎<span class="sub">(30/AÑO)</span></span>
+                <span class="stat-val" id="statVacaciones">0</span>
             </div>
         </div>
 
@@ -318,7 +327,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V32 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V33 PC READY</div>
             </div>
         </div>
     </div>
