@@ -62,8 +62,6 @@
         .stat-btn-adecuacion:active { background: rgba(0, 176, 255, 0.3); }
         .stat-btn-bolsa { background: rgba(255, 215, 0, 0.15); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .stat-btn-bolsa:active { background: rgba(255, 215, 0, 0.3); }
-        .stat-btn-vacaciones { background: rgba(0, 230, 118, 0.15); border: 1px dashed rgba(0, 230, 118, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-        .stat-btn-vacaciones:active { background: rgba(0, 230, 118, 0.3); }
 
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         
@@ -83,6 +81,7 @@
         .day-cell {
             background-color: var(--color-descanso); min-height: 75px;
             display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; position: relative;
+            transition: opacity 0.2s;
         }
         .day-num { font-size: 1.4rem; font-weight: 900; color: #999; line-height: 1; transition: color 0.2s; }
         .day-label { font-size: 0.55rem; font-weight: 900; color: #888; text-transform: uppercase; margin-top: 4px; transition: color 0.2s;}
@@ -187,8 +186,8 @@
                 <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statBolsa">0h</span>
             </div>
-            <div class="stat-item stat-btn-vacaciones" onclick="alertaProteccionEstructural('Vacaciones')" title="Total de días de vacaciones (calculado del calendario)">
-                <span class="stat-label" style="color:var(--color-vacaciones)">VAC ✎<span class="sub">(30/AÑO)</span></span>
+            <div class="stat-item">
+                <span class="stat-label" style="color:var(--color-vacaciones)">VAC<span class="sub">(30/AÑO)</span></span>
                 <span class="stat-val" id="statVacaciones">0</span>
             </div>
         </div>
@@ -327,7 +326,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V33 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V34 PC READY</div>
             </div>
         </div>
     </div>
@@ -510,29 +509,58 @@
         const esp = (primerDia === 0 ? 6 : primerDia - 1);
         const totalDias = new Date(y, m + 1, 0).getDate();
         
+        const diasRender = [];
+        // Días previos para rellenar semana
+        for (let i = esp - 1; i >= 0; i--) {
+            diasRender.push({ fecha: new Date(y, m, -i), tenue: true });
+        }
+        // Días del mes en curso
+        for (let d = 1; d <= totalDias; d++) {
+            diasRender.push({ fecha: new Date(y, m, d), tenue: false });
+        }
+        // Días posteriores para rellenar la última fila
+        const celdasTotales = esp + totalDias;
+        const huecosPost = celdasTotales % 7 === 0 ? 0 : 7 - (celdasTotales % 7);
+        for (let d = 1; d <= huecosPost; d++) {
+            diasRender.push({ fecha: new Date(y, m + 1, d), tenue: true });
+        }
+        
         const c = document.getElementById('diasContainer'); c.innerHTML = '';
-        for(let i=0; i<esp; i++) c.innerHTML += '<div class="day-cell empty" style="visibility:hidden"></div>';
         
         let cT=0, cN=0, cF=0;
-        for (let d = 1; d <= totalDias; d++) {
-            const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        
+        diasRender.forEach(item => {
+            const fy = item.fecha.getFullYear();
+            const fm = item.fecha.getMonth();
+            const fd = item.fecha.getDate();
+            const k = `${fy}-${String(fm+1).padStart(2,'0')}-${String(fd).padStart(2,'0')}`;
             const est = datosGuardados[k] || 0;
             let cls='', txt='LIBRE';
             
-            if(est===1) { cls='noche'; txt='NOCHE'; cN++; cT++; }
-            else if(est===2) { cls='festivo'; txt='FESTIVO'; cN++; cF++; cT++; }
+            // Sumar a los contadores del resumen SÓLO si es del mes visualizado principal
+            if (!item.tenue) {
+                if(est===1) { cN++; cT++; }
+                else if(est===2) { cN++; cF++; cT++; }
+            }
+            
+            if(est===1) { cls='noche'; txt='NOCHE'; }
+            else if(est===2) { cls='festivo'; txt='FESTIVO'; }
             else if(est===3) { cls='vacaciones'; txt='VACAS'; }
             else if(est===4) { cls='convenio'; txt='CONV'; }
             else if(est===5) { cls='adecuacion'; txt='ADEC'; }
             
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
-            if(y === hoy.getFullYear() && m === hoy.getMonth() && d === hoy.getDate()) div.classList.add('today');
+            if (item.tenue) div.style.opacity = '0.35'; // Atenuar visualmente
+            
+            if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
             if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
-            div.innerHTML += `<div class="day-num">${d}</div><div class="day-label">${txt}</div>`;
-            div.onclick = () => toggleDia(d);
+            div.innerHTML += `<div class="day-num">${fd}</div><div class="day-label">${txt}</div>`;
+            
+            // Al hacer clic, pasamos la clave absoluta (k) para no corromper la base de datos
+            div.onclick = () => toggleDia(k);
             c.appendChild(div);
-        }
+        });
         
         document.getElementById('resTrabajados').innerText = cT;
         document.getElementById('resNoches').innerText = cN;
@@ -543,8 +571,8 @@
         calcularGlobales(y);
     }
 
-    function toggleDia(d) {
-        const k = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    function toggleDia(k) {
+        // La función ahora usa la clave exacta del día (YYYY-MM-DD), no solo el número (d)
         datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 6;
         if(datosGuardados[k] === 0) delete datosGuardados[k];
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
