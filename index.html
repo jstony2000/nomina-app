@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nómina Stellantis PRO</title>
@@ -50,7 +48,7 @@
         }
         .stat-item { color: #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #222; min-width: 50px;}
         .stat-item:last-child { border-right: none; }
-        .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; color: #888; }
+        .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; }
         .stat-val { font-size: 0.85rem; color: #fff; }
         .stat-btn-extra { background: rgba(255, 145, 0, 0.15); border: 1px dashed rgba(255, 145, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .stat-btn-extra:active { background: rgba(255, 145, 0, 0.3); }
@@ -62,7 +60,6 @@
             color: #666; font-weight: 900; padding: 10px 0 5px 0; background: #000; font-size: 0.75rem; position: sticky; top: 0; z-index: 10;
         }
         
-        /* SISTEMA RESPONSIVO PARA DÍAS DE LA SEMANA */
         .d-full { display: none; }
         .d-short { display: inline; }
         @media (min-width: 500px) {
@@ -85,7 +82,14 @@
         .day-cell.vacaciones { background-color: var(--color-vacaciones); }
         .day-cell.convenio { background-color: var(--color-convenio); }
         .day-cell.adecuacion { background-color: var(--color-adecuacion); }
-        .day-cell.today { border: 2px solid #fff; box-shadow: 0 0 10px var(--color-adecuacion); }
+        
+        @keyframes pulso-hoy {
+            0% { box-shadow: 0 0 5px var(--color-adecuacion); transform: scale(1); }
+            50% { box-shadow: 0 0 20px var(--color-adecuacion), inset 0 0 10px rgba(0, 176, 255, 0.3); transform: scale(1.02); }
+            100% { box-shadow: 0 0 5px var(--color-adecuacion); transform: scale(1); }
+        }
+        .day-cell.today { border: 2px solid #fff; animation: pulso-hoy 2s infinite ease-in-out; z-index: 5;}
+        
         .badge-extra { position: absolute; top: 2px; right: 3px; background: var(--color-extra); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 3px; border-radius: 3px; }
 
         .leyenda { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 8px; background: #080808; border-top: 1px solid #222; flex-shrink: 0; font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
@@ -94,7 +98,7 @@
         }
         .res-box { display: flex; flex-direction: column; }
         .res-lab { font-size: 0.55rem; color: #666; text-transform: uppercase; font-weight: 900; margin-bottom: 2px; }
-        .res-val { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .res-val { font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 900; color: #fff; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: flex-start; padding: 10px; overflow-y: auto;}
         .modal-content { background: #1e1e1e; padding: 15px; border-radius: 12px; width: 100%; max-width: 500px; color: #fff; margin-top: 20px;}
@@ -131,16 +135,13 @@
         .p-head { background: #000; color: #888; text-align: center; font-size: 0.7rem; padding: 4px 0; font-weight: bold; }
         .p-cell { text-align: center; height: 42px; cursor: pointer; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.9rem; color: #fff; }
 
-        /* MODO HORIZONTAL MÓVIL (EXCLUYE PC) */
         @media (max-height: 550px) and (orientation: landscape) {
             .mini-stats, .leyenda, .resumen-panel { display: none !important; }
             #app-container { max-width: 100%; border: none; }
             .calendar-container { height: calc(100vh - 60px); overflow-y: scroll !important; -webkit-overflow-scrolling: touch; }
             .day-cell { min-height: 90px; }
         }
-    </style>
-</head>
-<body>
+    </style></head><body>
 
     <div id="app-container">
         <div class="header">
@@ -154,14 +155,14 @@
         </div>
 
         <div class="mini-stats">
-            <div class="stat-item"><span class="stat-label">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:#aaa;">H. TRAB</span><span class="stat-val" id="statHorasTrabajadas">0h</span></div>
             <div class="stat-item stat-btn-extra" onclick="abrirExtraModal()" title="Pulsar para añadir o quitar horas extra">
                 <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎</span>
                 <span class="stat-val" id="statHorasExtra">0h</span>
             </div>
-            <div class="stat-item"><span class="stat-label">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
-            <div class="stat-item"><span class="stat-label">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
-            <div class="stat-item"><span class="stat-label">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-convenio)">CONV</span><span class="stat-val" id="statConvenio">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-adecuacion)">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
+            <div class="stat-item"><span class="stat-label" style="color:var(--color-vacaciones)">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
             <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
         </div>
 
@@ -184,12 +185,13 @@
             <span><b style="color:var(--color-vacaciones)">●</b> VAC</span>
             <span><b style="color:var(--color-convenio)">●</b> CONV</span>
             <span><b style="color:var(--color-adecuacion)">●</b> ADEC</span>
+            <span><b style="color:#555;">●</b> LIBRE</span>
         </div>
         <div class="resumen-panel">
             <div class="res-box"><span class="res-lab">TRABAJADOS</span><span class="res-val" id="resTrabajados">0</span></div>
             <div class="res-box"><span class="res-lab" style="color:var(--color-noche)">NOCHES</span><span class="res-val" id="resNoches">0</span></div>
             <div class="res-box"><span class="res-lab" style="color:var(--color-festivo)">FESTIVOS</span><span class="res-val" id="resFestivos">0</span></div>
-            <div class="res-box"><span class="res-lab">LIBRES</span><span class="res-val" id="resLibres">0</span></div>
+            <div class="res-box"><span class="res-lab" style="color:#aaa">LIBRES</span><span class="res-val" id="resLibres">0</span></div>
         </div>
     </div>
 
@@ -298,7 +300,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V28 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#444;">V29 PC READY</div>
             </div>
         </div>
     </div>
@@ -315,9 +317,7 @@
             <button class="btn-save" style="background:var(--color-extra); color:#000;" onclick="guardarExtraDia()">GUARDAR CAMBIOS</button>
             <button class="btn-save" style="background:#444;" onclick="cerrarExtraModal()">CANCELAR</button>
         </div>
-    </div>
-
-<script>
+    </div><script>
     const K_DATA = 'nomina_stellantis_universal_data_v3'; 
     const K_CONF = 'nomina_stellantis_universal_config_v4';
     const K_EXTR = 'nomina_stellantis_universal_extras_diarias_v1';
@@ -710,7 +710,4 @@
     function cambiarMes(d) { fechaActual.setMonth(fechaActual.getMonth()+d); renderCalendario(); }
     function irAHoy() { fechaActual = new Date(); renderCalendario(); }
 
-    init();
-</script>
-</body>
-</html>
+    init();</script></body></html>
