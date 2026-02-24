@@ -51,8 +51,16 @@
         .stat-item:last-child { border-right: none; }
         .stat-label { font-size: 0.45rem; margin-bottom: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; }
         .stat-val { font-size: 0.85rem; color: #fff; }
+        
+        /* Modificadores dinámicos de botones superiores */
         .stat-btn-extra { background: rgba(255, 145, 0, 0.15); border: 1px dashed rgba(255, 145, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .stat-btn-extra:active { background: rgba(255, 145, 0, 0.3); }
+        .stat-btn-convenio { background: rgba(255, 234, 0, 0.15); border: 1px dashed rgba(255, 234, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .stat-btn-convenio:active { background: rgba(255, 234, 0, 0.3); }
+        .stat-btn-adecuacion { background: rgba(0, 176, 255, 0.15); border: 1px dashed rgba(0, 176, 255, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .stat-btn-adecuacion:active { background: rgba(0, 176, 255, 0.3); }
+        .stat-btn-bolsa { background: rgba(255, 215, 0, 0.15); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .stat-btn-bolsa:active { background: rgba(255, 215, 0, 0.3); }
 
         .calendar-container { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #000; }
         
@@ -161,10 +169,19 @@
                 <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎</span>
                 <span class="stat-val" id="statHorasExtra">0h</span>
             </div>
-            <div class="stat-item"><span class="stat-label" style="color:var(--color-convenio)">CONV <span style="font-size:0.4rem; color:#888;">(2/AÑO)</span></span><span class="stat-val" id="statConvenio">0</span></div>
-            <div class="stat-item"><span class="stat-label" style="color:var(--color-adecuacion)">ADEC</span><span class="stat-val" id="statAdecuacion">0</span></div>
+            <div class="stat-item stat-btn-convenio" onclick="alertaProteccionEstructural('Convenio')" title="Total de días de convenio (calculado del calendario)">
+                <span class="stat-label" style="color:var(--color-convenio)">CONV ✎<span style="font-size:0.4rem; color:#888;">(2/AÑO)</span></span>
+                <span class="stat-val" id="statConvenio">0</span>
+            </div>
+            <div class="stat-item stat-btn-adecuacion" onclick="alertaProteccionEstructural('Adecuación')" title="Total de días de adecuación (calculado del calendario)">
+                <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎</span>
+                <span class="stat-val" id="statAdecuacion">0</span>
+            </div>
             <div class="stat-item"><span class="stat-label" style="color:var(--color-vacaciones)">VAC</span><span class="stat-val" id="statVacaciones">0</span></div>
-            <div class="stat-item"><span class="stat-label" style="color:var(--color-bolsa)">BOLSA</span><span class="stat-val" id="statBolsa">0h</span></div>
+            <div class="stat-item stat-btn-bolsa" onclick="editarBolsaRapida()" title="Pulsar para modificar la Bolsa de Horas Oficial">
+                <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎</span>
+                <span class="stat-val" id="statBolsa">0h</span>
+            </div>
         </div>
 
         <div class="calendar-container">
@@ -301,7 +318,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V31 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V32 PC READY</div>
             </div>
         </div>
     </div>
@@ -668,6 +685,25 @@
         document.getElementById(id).classList.add('active');
         if(id==='tab-nomina') renderNominaDetallada();
         if(id==='tab-turnos') renderEditorGrid();
+    }
+
+    /* Acciones Rápidas desde la botonera superior */
+    function editarBolsaRapida() {
+        let num = prompt("Introduce el nuevo saldo oficial para la BOLSA DE HORAS:", configActual.bolsa || 0);
+        if (num !== null) {
+            let parsed = parseFloat(num);
+            if (!isNaN(parsed)) {
+                configActual.bolsa = parsed;
+                localStorage.setItem(K_CONF, JSON.stringify(configActual));
+                const confBolsaInput = document.getElementById('confBolsa');
+                if(confBolsaInput) confBolsaInput.value = parsed;
+                renderCalendario();
+            }
+        }
+    }
+
+    function alertaProteccionEstructural(tipo) {
+        alert(`⚠️ PROTECCIÓN DE DATOS\n\nNo puedes modificar el total de ${tipo} escribiendo un número arbitrario. Este es un "Total Calculado" derivado del calendario anual.\n\nPara añadir o quitar días, haz clic directamente sobre los días correspondientes en el calendario inferior.`);
     }
 
     function abrirExtraModal() { 
