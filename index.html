@@ -392,8 +392,41 @@
         }
     }
 
+    // --- PRIORIDAD 2: INYECCIÓN DE SERVICE WORKER DINÁMICO ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const swCode = `
+                const CACHE_NAME = 'stellantis-pwa-v1';
+                self.addEventListener('install', e => {
+                    self.skipWaiting();
+                    e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([location.href])));
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(res => {
+                            return res || fetch(e.request).then(fetchRes => {
+                                return caches.open(CACHE_NAME).then(c => {
+                                    if(e.request.url.startsWith('http')) c.put(e.request, fetchRes.clone());
+                                    return fetchRes;
+                                });
+                            });
+                        }).catch(() => caches.match(location.href))
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl)
+                .then(reg => console.log('✅ Service Worker registrado (Offline habilitado)'))
+                .catch(err => console.error('❌ Error SW:', err));
+        });
+    }
+
+    // --- PRIORIDAD 1: MODIFICACIÓN DE INIT() PARA PREGUNTAR ---
     async function init() {
-        if(localStorage.getItem(K_DATA)) datosGuardados = JSON.parse(localStorage.getItem(K_DATA));
+        let hayDatosLocales = false;
+        
+        if(localStorage.getItem(K_DATA)) { datosGuardados = JSON.parse(localStorage.getItem(K_DATA)); hayDatosLocales = true; }
         if(localStorage.getItem(K_CONF)) configActual = JSON.parse(localStorage.getItem(K_CONF));
         if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
         if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
@@ -402,9 +435,15 @@
             const res = await fetch(CLOUD_URL + '?t=' + Date.now());
             if(res.ok) {
                 const cloudData = await res.json();
-                aplicarNuevosDatos(cloudData);
+                if (hayDatosLocales) {
+                    if (confirm("☁️ Hay una copia en la nube disponible.\n¿Deseas sobrescribir tus datos locales con los de GitHub?")) {
+                        aplicarNuevosDatos(cloudData);
+                    }
+                } else {
+                    aplicarNuevosDatos(cloudData);
+                }
             }
-        } catch (e) { console.log("Usando datos locales."); }
+        } catch (e) { console.log("Usando datos locales o sin conexión."); }
 
         let savedStart = localStorage.getItem(K_START);
         if(!savedStart) savedStart = "2026-01-01";
@@ -510,15 +549,12 @@
         const totalDias = new Date(y, m + 1, 0).getDate();
         
         const diasRender = [];
-        // Días previos para rellenar semana
         for (let i = esp - 1; i >= 0; i--) {
             diasRender.push({ fecha: new Date(y, m, -i), tenue: true });
         }
-        // Días del mes en curso
         for (let d = 1; d <= totalDias; d++) {
             diasRender.push({ fecha: new Date(y, m, d), tenue: false });
         }
-        // Días posteriores para rellenar la última fila
         const celdasTotales = esp + totalDias;
         const huecosPost = celdasTotales % 7 === 0 ? 0 : 7 - (celdasTotales % 7);
         for (let d = 1; d <= huecosPost; d++) {
@@ -537,7 +573,6 @@
             const est = datosGuardados[k] || 0;
             let cls='', txt='LIBRE';
             
-            // Sumar a los contadores del resumen SÓLO si es del mes visualizado principal
             if (!item.tenue) {
                 if(est===1) { cN++; cT++; }
                 else if(est===2) { cN++; cF++; cT++; }
@@ -551,13 +586,12 @@
             
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
-            if (item.tenue) div.style.opacity = '0.35'; // Atenuar visualmente
+            if (item.tenue) div.style.opacity = '0.35'; 
             
             if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
             if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
             div.innerHTML += `<div class="day-num">${fd}</div><div class="day-label">${txt}</div>`;
             
-            // Al hacer clic, pasamos la clave absoluta (k) para no corromper la base de datos
             div.onclick = () => toggleDia(k);
             c.appendChild(div);
         });
@@ -572,7 +606,6 @@
     }
 
     function toggleDia(k) {
-        // La función ahora usa la clave exacta del día (YYYY-MM-DD), no solo el número (d)
         datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 6;
         if(datosGuardados[k] === 0) delete datosGuardados[k];
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
@@ -724,7 +757,6 @@
         if(id==='tab-turnos') renderEditorGrid();
     }
 
-    /* Acciones Rápidas desde la botonera superior */
     function editarBolsaRapida() {
         let num = prompt("Introduce el nuevo saldo oficial para la BOLSA DE HORAS:", configActual.bolsa || 0);
         if (num !== null) {
