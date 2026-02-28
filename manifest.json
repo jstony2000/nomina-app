@@ -1,20 +1,23 @@
 {
-  "name": "Nómina PRO",
-  "short_name": "Nómina",
-  "start_url": "./index.html",
+  "name": "Nómina Stellantis PRO",
+  "short_name": "Nómina PRO",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#000000",
+  "background_color": "#050505",
   "theme_color": "#000000",
+  "orientation": "any",
   "icons": [
     {
       "src": "icono.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icono.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
