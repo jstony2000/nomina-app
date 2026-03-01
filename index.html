@@ -282,9 +282,14 @@
                     <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>KA9</b>.</span>
                 </div>
                 <div class="config-row">
+                    <label>Otros Complementos (K70, etc.):</label>
+                    <input type="number" id="confOtros" step="0.01">
+                    <span class="help-text">💶 Importes fijos extra como el K70 (Complemento descanso).</span>
+                </div>
+                <div class="config-row">
                     <label>% IRPF + SS:</label>
-                    <input type="number" id="confDeduccion" step="0.001">
-                    <span class="help-text">🧮 Ej: 21% IRPF + 6.35% SS = Pon <b>0.2735</b></span>
+                    <input type="number" id="confDeduccion" step="0.0001">
+                    <span class="help-text">🧮 Ej: 20.59% IRPF + 6.50% SS = Pon <b>0.2709</b></span>
                 </div>
                 <button class="btn-save" onclick="guardarConfig()">GUARDAR PRECIOS</button>
             </div>
@@ -360,7 +365,7 @@
     let datosGuardados = {}; 
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
-    let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0, extraBase: 0 };
+    let configActual = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 0, extraBase: 0, otros: 16.96 };
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -458,6 +463,9 @@
         
         if(configActual.extraBase === undefined) configActual.extraBase = 0;
         document.getElementById('confExtraBase').value = configActual.extraBase;
+
+        if(configActual.otros === undefined) configActual.otros = 16.96;
+        document.getElementById('confOtros').value = configActual.otros;
 
         renderCalendario();
     }
@@ -647,6 +655,7 @@
         brutoAnual += (nochesAnuales * 7.75 * configActual.noche);
         brutoAnual += (nochesAnuales * 3.875 * configActual.garantia);
         brutoAnual += (festivosAnuales * 7.75 * configActual.festivo);
+        brutoAnual += ((configActual.otros || 0) * 11); // Estimación anual complementos fijos (suponiendo 11 meses de cobro habitual)
         let netoAnual = brutoAnual * (1 - configActual.deduccion);
 
         document.getElementById('statTotalEurosConfig').innerText = fmtM(brutoAnual) + " €";
@@ -681,6 +690,7 @@
         let impNoche = hNoche * configActual.noche;
         let impGarantia = hGarantia * configActual.garantia;
         let impFestivo = hFestivo * configActual.festivo;
+        let impOtros = configActual.otros || 0;
         
         let impPagaExtra = 0;
         let rowPagaExtra = "";
@@ -694,8 +704,13 @@
         if(hExtraMes !== 0) {
             rowExtras = `<tr><td>Horas Extra Realizadas</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(Pend. Pago)</td></tr>`;
         }
+        
+        let rowOtros = "";
+        if (impOtros > 0) {
+            rowOtros = `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>`;
+        }
 
-        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra;
+        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros;
         let totalDeduccion = totalBruto * configActual.deduccion;
         let liquido = totalBruto - totalDeduccion;
 
@@ -705,6 +720,7 @@
             <tr><td>Plus Nocturnidad (K05)</td><td>${fmtN(hNoche)}</td><td>${fmtM(configActual.noche)} €</td><td>${fmtM(impNoche)} €</td></tr>
             <tr><td>Garantía (K75)</td><td>${fmtN(hGarantia)}</td><td>${fmtM(configActual.garantia)} €</td><td>${fmtM(impGarantia)} €</td></tr>
             <tr><td>Festivo (KA9)</td><td>${fmtN(hFestivo)}</td><td>${fmtM(configActual.festivo)} €</td><td>${fmtM(impFestivo)} €</td></tr>
+            ${rowOtros}
             ${rowExtras}
         `;
 
@@ -735,6 +751,7 @@
         document.getElementById('confNoche').value = configActual.noche;
         document.getElementById('confGarantia').value = configActual.garantia;
         document.getElementById('confFestivo').value = configActual.festivo;
+        document.getElementById('confOtros').value = configActual.otros || 0;
         document.getElementById('confDeduccion').value = configActual.deduccion;
         document.getElementById('confBolsa').value = configActual.bolsa || 0;
         document.getElementById('confExtraBase').value = configActual.extraBase || 0;
@@ -752,6 +769,7 @@
         configActual.noche = parseFloat(document.getElementById('confNoche').value) || 0;
         configActual.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
         configActual.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
+        configActual.otros = parseFloat(document.getElementById('confOtros').value) || 0;
         configActual.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
         configActual.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
         configActual.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
