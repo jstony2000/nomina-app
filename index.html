@@ -53,7 +53,6 @@
         .stat-label span.sub { font-size: 0.35rem; color: #888; }
         .stat-val { font-size: 0.85rem; color: #fff; margin-top: 2px; }
         
-        /* Modificadores dinámicos de botones superiores */
         .stat-btn-extra { background: rgba(255, 145, 0, 0.15); border: 1px dashed rgba(255, 145, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .stat-btn-extra:active { background: rgba(255, 145, 0, 0.3); }
         .stat-btn-convenio { background: rgba(255, 234, 0, 0.15); border: 1px dashed rgba(255, 234, 0, 0.5); border-radius: 4px; cursor: pointer; transition: background 0.2s; }
@@ -318,7 +317,13 @@
                     <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial):</label>
                     <input type="number" id="confBolsa" step="0.1">
                 </div>
-                <button class="btn-save" onclick="guardarConfig()">ACTUALIZAR BOLSA</button>
+                
+                <div class="config-row">
+                    <label style="color:var(--color-extra);">HORAS EXTRA (Base/Ajuste manual):</label>
+                    <input type="number" id="confExtraBase" step="0.1">
+                </div>
+                
+                <button class="btn-save" onclick="guardarConfig()">ACTUALIZAR CONTADORES</button>
                 
                 <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
                 
@@ -355,7 +360,7 @@
     let datosGuardados = {}; 
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
-    let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0 };
+    let configActual = { salario: 2516.38, pagaExtra: 2516.38, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.285, bolsa: 0, extraBase: 0 };
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -392,7 +397,6 @@
         }
     }
 
-    // --- PRIORIDAD 2: INYECCIÓN DE SERVICE WORKER DINÁMICO ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const swCode = `
@@ -417,12 +421,11 @@
             const blob = new Blob([swCode], { type: 'application/javascript' });
             const swUrl = URL.createObjectURL(blob);
             navigator.serviceWorker.register(swUrl)
-                .then(reg => console.log('✅ Service Worker registrado (Offline habilitado)'))
+                .then(reg => console.log('✅ Service Worker registrado'))
                 .catch(err => console.error('❌ Error SW:', err));
         });
     }
 
-    // --- PRIORIDAD 1: MODIFICACIÓN DE INIT() PARA PREGUNTAR ---
     async function init() {
         let hayDatosLocales = false;
         
@@ -449,8 +452,12 @@
         if(!savedStart) savedStart = "2026-01-01";
         document.getElementById('cycleStartDate').value = savedStart;
         document.getElementById('applyYear').value = fechaActual.getFullYear();
+        
         if(configActual.bolsa === undefined) configActual.bolsa = 0;
         document.getElementById('confBolsa').value = configActual.bolsa;
+        
+        if(configActual.extraBase === undefined) configActual.extraBase = 0;
+        document.getElementById('confExtraBase').value = configActual.extraBase;
 
         renderCalendario();
     }
@@ -613,8 +620,9 @@
     }
 
     function calcularGlobales(year) {
-        let diasT=0, hExtraAnual=0, nochesAnuales=0, festivosAnuales=0;
+        let diasT=0, nochesAnuales=0, festivosAnuales=0;
         let cVacAnual=0, cConvAnual=0, cAdecAnual=0;
+        let hExtraAnual = configActual.extraBase || 0;
 
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
@@ -729,6 +737,7 @@
         document.getElementById('confFestivo').value = configActual.festivo;
         document.getElementById('confDeduccion').value = configActual.deduccion;
         document.getElementById('confBolsa').value = configActual.bolsa || 0;
+        document.getElementById('confExtraBase').value = configActual.extraBase || 0;
 
         initMonthSelector(); 
         renderNominaDetallada(); 
@@ -745,6 +754,8 @@
         configActual.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
         configActual.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
         configActual.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
+        configActual.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
+        
         localStorage.setItem(K_CONF, JSON.stringify(configActual));
         renderCalendario(); alert("Guardado correctamente");
     }
