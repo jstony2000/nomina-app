@@ -15,6 +15,7 @@
             --color-noche: #2979ff; --color-festivo: #ff1744; --color-vacaciones: #00e676;
             --color-convenio: #ffea00; --color-adecuacion: #00b0ff; 
             --color-descanso: #1a1a1a; --color-extra: #ff9100; --color-total: #00e676; --color-bolsa: #ffd700;
+            --color-dia: #ffffff; /* Nuevo color para turno de día */
         }
         * { box-sizing: border-box; }
         body {
@@ -92,6 +93,8 @@
         .day-cell.vacaciones { background-color: var(--color-vacaciones); }
         .day-cell.convenio { background-color: var(--color-convenio); }
         .day-cell.adecuacion { background-color: var(--color-adecuacion); }
+        .day-cell.dia { background-color: var(--color-dia); }
+        .day-cell.dia .day-num, .day-cell.dia .day-label { color: #000; font-weight: 900; }
         
         @keyframes pulso-hoy {
             0% { box-shadow: 0 0 5px var(--color-adecuacion); transform: scale(1); }
@@ -205,6 +208,7 @@
         </div>
 
         <div class="leyenda">
+            <span><b style="color:var(--color-dia)">●</b> DÍA</span>
             <span><b style="color:var(--color-noche)">●</b> NOCHE</span>
             <span><b style="color:var(--color-festivo)">●</b> FEST</span>
             <span><b style="color:var(--color-vacaciones)">●</b> VAC</span>
@@ -591,6 +595,7 @@
             if (!item.tenue) {
                 if(est===1) { cN++; cT++; }
                 else if(est===2) { cN++; cF++; cT++; }
+                else if(est===6) { cT++; } // Se suma a los días trabajados
             }
             
             if(est===1) { cls='noche'; txt='NOCHE'; }
@@ -598,6 +603,7 @@
             else if(est===3) { cls='vacaciones'; txt='VACAS'; }
             else if(est===4) { cls='convenio'; txt='CONV'; }
             else if(est===5) { cls='adecuacion'; txt='ADEC'; }
+            else if(est===6) { cls='dia'; txt='DÍA'; }
             
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
@@ -621,7 +627,7 @@
     }
 
     function toggleDia(k) {
-        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 6;
+        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 7; // Ahora ciclo de 7 estados
         if(datosGuardados[k] === 0) delete datosGuardados[k];
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
         renderCalendario();
@@ -634,7 +640,8 @@
 
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
-                if(est===1 || est===2) { diasT++; nochesAnuales++; }
+                if(est===1 || est===2 || est===6) { diasT++; } // Estado 6 (Día) suma al cálculo de horas trabajadas
+                if(est===1 || est===2) { nochesAnuales++; }
                 if(est===2) festivosAnuales++;
                 if(est===3) cVacAnual++;
                 if(est===4) cConvAnual++;
@@ -655,7 +662,7 @@
         brutoAnual += (nochesAnuales * 7.75 * configActual.noche);
         brutoAnual += (nochesAnuales * 3.875 * configActual.garantia);
         brutoAnual += (festivosAnuales * 7.75 * configActual.festivo);
-        brutoAnual += ((configActual.otros || 0) * 11); // Estimación anual complementos fijos (suponiendo 11 meses de cobro habitual)
+        brutoAnual += ((configActual.otros || 0) * 11); 
         let netoAnual = brutoAnual * (1 - configActual.deduccion);
 
         document.getElementById('statTotalEurosConfig').innerText = fmtM(brutoAnual) + " €";
