@@ -15,7 +15,7 @@
             --color-noche: #2979ff; --color-festivo: #ff1744; --color-vacaciones: #00e676;
             --color-convenio: #ffea00; --color-adecuacion: #00b0ff; 
             --color-descanso: #1a1a1a; --color-extra: #ff9100; --color-total: #00e676; --color-bolsa: #ffd700;
-            --color-dia: #ffffff; /* Nuevo color para turno de día */
+            --color-dia: #ffffff;
         }
         * { box-sizing: border-box; }
         body {
@@ -42,6 +42,7 @@
         }
         .btn-nav { font-size: 1.5rem; font-weight: 900; }
         .btn-config { font-size: 1.2rem; margin-left: 8px; }
+        #btnLock { transition: transform 0.1s ease-in-out, background-color 0.3s; }
 
         .mini-stats {
             display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 2px;
@@ -162,6 +163,7 @@
             <h2 id="mesTitulo" onclick="irAHoy()">ENERO 2026</h2>
             <div style="display:flex;">
                 <button class="btn-nav" onclick="cambiarMes(1)">❯</button>
+                <button class="btn-config" id="btnLock" onclick="toggleLock()" title="Desbloquear para editar">🔒</button>
                 <button class="btn-config" onclick="descargarCopia()">💾</button>
                 <button class="btn-config" onclick="abrirConfig()">⚙️</button>
             </div>
@@ -370,6 +372,7 @@
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
     let configActual = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 0, extraBase: 0, otros: 16.96 };
+    let isLocked = true; // El candado arranca cerrado
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -471,6 +474,7 @@
         if(configActual.otros === undefined) configActual.otros = 16.96;
         document.getElementById('confOtros').value = configActual.otros;
 
+        actualizarUIBloqueo();
         renderCalendario();
     }
 
@@ -495,6 +499,18 @@
         const date1 = new Date(d1); date1.setHours(12,0,0,0);
         const date2 = new Date(d2); date2.setHours(12,0,0,0);
         return Math.round((date2 - date1) / (1000*60*60*24));
+    }
+
+    function toggleLock() {
+        isLocked = !isLocked;
+        actualizarUIBloqueo();
+    }
+
+    function actualizarUIBloqueo() {
+        const btn = document.getElementById('btnLock');
+        btn.innerText = isLocked ? '🔒' : '🔓';
+        btn.style.backgroundColor = isLocked ? '#2a2a2a' : '#8b0000'; // Rojo si está abierto
+        renderCalendario(); // Para actualizar los cursores visualmente
     }
 
     function renderEditorGrid() {
@@ -595,7 +611,7 @@
             if (!item.tenue) {
                 if(est===1) { cN++; cT++; }
                 else if(est===2) { cN++; cF++; cT++; }
-                else if(est===6) { cT++; } // Se suma a los días trabajados
+                else if(est===6) { cT++; }
             }
             
             if(est===1) { cls='noche'; txt='NOCHE'; }
@@ -608,12 +624,21 @@
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
             if (item.tenue) div.style.opacity = '0.35'; 
+            div.style.cursor = isLocked ? 'default' : 'pointer'; // Feedback de bloqueo
             
             if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
             if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
             div.innerHTML += `<div class="day-num">${fd}</div><div class="day-label">${txt}</div>`;
             
-            div.onclick = () => toggleDia(k);
+            div.onclick = () => {
+                if (isLocked) {
+                    const btn = document.getElementById('btnLock');
+                    btn.style.transform = 'scale(1.2)';
+                    setTimeout(() => btn.style.transform = 'scale(1)', 150);
+                    return;
+                }
+                toggleDia(k);
+            };
             c.appendChild(div);
         });
         
@@ -627,7 +652,7 @@
     }
 
     function toggleDia(k) {
-        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 7; // Ahora ciclo de 7 estados
+        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 7;
         if(datosGuardados[k] === 0) delete datosGuardados[k];
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
         renderCalendario();
@@ -640,7 +665,7 @@
 
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
-                if(est===1 || est===2 || est===6) { diasT++; } // Estado 6 (Día) suma al cálculo de horas trabajadas
+                if(est===1 || est===2 || est===6) { diasT++; }
                 if(est===1 || est===2) { nochesAnuales++; }
                 if(est===2) festivosAnuales++;
                 if(est===3) cVacAnual++;
