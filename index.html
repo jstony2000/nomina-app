@@ -94,7 +94,7 @@
         .day-cell.vacaciones { background-color: var(--color-vacaciones); }
         .day-cell.convenio { background-color: var(--color-convenio); }
         .day-cell.adecuacion { background-color: var(--color-adecuacion); }
-        .day-cell.dia { background-color: var(--color-dia); }
+        .day-cell.dia { background-color: var(--color-dia); border: 2px solid #ccc; }
         .day-cell.dia .day-num, .day-cell.dia .day-label { color: #000; font-weight: 900; }
         
         @keyframes pulso-hoy {
@@ -183,7 +183,7 @@
                 <span class="stat-val" id="statConvenio">0</span>
             </div>
             <div class="stat-item stat-btn-adecuacion" onclick="alertaProteccionEstructural('Adecuación')" title="Total de días de adecuación (calculado del calendario)">
-                <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎<span class="sub">&nbsp;</span></span>
+                <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎<span class="sub" id="statAdecSub">(0/8)</span></span>
                 <span class="stat-val" id="statAdecuacion">0</span>
             </div>
             <div class="stat-item stat-btn-bolsa" onclick="editarBolsaRapida()" title="Pulsar para modificar la Bolsa de Horas Oficial">
@@ -210,7 +210,7 @@
         </div>
 
         <div class="leyenda">
-            <span><b style="color:var(--color-dia)">●</b> DÍA</span>
+            <span><b style="color:var(--color-dia); border:1px solid #ccc;">●</b> DÍA</span>
             <span><b style="color:var(--color-noche)">●</b> NOCHE</span>
             <span><b style="color:var(--color-festivo)">●</b> FEST</span>
             <span><b style="color:var(--color-vacaciones)">●</b> VAC</span>
@@ -333,6 +333,12 @@
                     <label style="color:var(--color-extra);">HORAS EXTRA (Base/Ajuste manual):</label>
                     <input type="number" id="confExtraBase" step="0.1">
                 </div>
+
+                <div class="config-row">
+                    <label style="color:var(--color-adecuacion);">SALDO ADEC TOTAL (Días):</label>
+                    <input type="number" id="confAdecTotal" step="1">
+                    <span class="help-text">📉 Días totales anuales (ej: 8) para calcular remanente.</span>
+                </div>
                 
                 <button class="btn-save" onclick="guardarConfig()">ACTUALIZAR CONTADORES</button>
                 
@@ -342,7 +348,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V34 PC READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V35 PC READY</div>
             </div>
         </div>
     </div>
@@ -371,8 +377,9 @@
     let datosGuardados = {}; 
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
-    let configActual = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 0, extraBase: 0, otros: 16.96 };
-    let isLocked = true; // El candado arranca cerrado
+    // Añadido adecTotal a la configuración
+    let configActual = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 0, extraBase: 0, otros: 16.96, adecTotal: 8 };
+    let isLocked = true;
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -474,6 +481,9 @@
         if(configActual.otros === undefined) configActual.otros = 16.96;
         document.getElementById('confOtros').value = configActual.otros;
 
+        if(configActual.adecTotal === undefined) configActual.adecTotal = 8;
+        document.getElementById('confAdecTotal').value = configActual.adecTotal;
+
         actualizarUIBloqueo();
         renderCalendario();
     }
@@ -509,8 +519,8 @@
     function actualizarUIBloqueo() {
         const btn = document.getElementById('btnLock');
         btn.innerText = isLocked ? '🔒' : '🔓';
-        btn.style.backgroundColor = isLocked ? '#2a2a2a' : '#8b0000'; // Rojo si está abierto
-        renderCalendario(); // Para actualizar los cursores visualmente
+        btn.style.backgroundColor = isLocked ? '#2a2a2a' : '#8b0000'; 
+        renderCalendario(); 
     }
 
     function renderEditorGrid() {
@@ -624,7 +634,7 @@
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
             if (item.tenue) div.style.opacity = '0.35'; 
-            div.style.cursor = isLocked ? 'default' : 'pointer'; // Feedback de bloqueo
+            div.style.cursor = isLocked ? 'default' : 'pointer'; 
             
             if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
             if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
@@ -681,7 +691,11 @@
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
         document.getElementById('statVacaciones').innerText = cVacAnual;
         document.getElementById('statConvenio').innerText = cConvAnual;
+        
+        // Actualizamos ADEC para mostrar consumidos vs total
         document.getElementById('statAdecuacion').innerText = cAdecAnual;
+        const totalAdec = configActual.adecTotal || 8;
+        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${totalAdec})`;
 
         let brutoAnual = (configActual.salario * 12) + (configActual.pagaExtra * 2);
         brutoAnual += (nochesAnuales * 7.75 * configActual.noche);
@@ -787,6 +801,7 @@
         document.getElementById('confDeduccion').value = configActual.deduccion;
         document.getElementById('confBolsa').value = configActual.bolsa || 0;
         document.getElementById('confExtraBase').value = configActual.extraBase || 0;
+        document.getElementById('confAdecTotal').value = configActual.adecTotal || 8;
 
         initMonthSelector(); 
         renderNominaDetallada(); 
@@ -805,6 +820,7 @@
         configActual.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
         configActual.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
         configActual.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
+        configActual.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
         
         localStorage.setItem(K_CONF, JSON.stringify(configActual));
         renderCalendario(); alert("Guardado correctamente");
@@ -865,7 +881,14 @@
     function descargarCopia() {
         const p = { data: datosGuardados, config: configActual, extras: horasExtra, patron: patronPlano, start: document.getElementById('cycleStartDate').value };
         const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p));
-        const a = document.createElement('a'); a.href = s; a.download = "nomina_backup.json"; a.click();
+        const a = document.createElement('a'); 
+        
+        // Cambio clave: Nombre de archivo con fecha para evitar caos de versiones
+        const dateStr = new Date().toISOString().split('T')[0];
+        a.download = `nomina_stellantis_backup_${dateStr}.json`;
+        
+        a.href = s; 
+        a.click();
     }
     
     function cargarCopia(i) {
