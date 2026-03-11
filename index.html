@@ -353,7 +353,7 @@
             </div>
 
             <div id="tab-datos" class="tab-content">
-                <button class="btn-save btn-update" onclick="forzarActualizacion()">🔄 FORZAR ACTUALIZACIÓN APP</button>
+                <button class="btn-save btn-update" id="btnForzarAct" onclick="forzarActualizacion()">🔄 FORZAR ACTUALIZACIÓN APP</button>
                 <button id="btnInstall" class="btn-save btn-install" onclick="instalarApp()">📲 INSTALAR APP</button>
                 <div class="config-row">
                     <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial del Año):</label>
@@ -372,7 +372,7 @@
                 <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V39 AUDITOR PRO</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V41 BLINDADA</div>
             </div>
         </div>
     </div>
@@ -404,24 +404,33 @@
     let configAnual = {}; 
     const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11, precioExtra: 20.00, mesesParams: {} };
     
-    let editMode = 0; // 0: Lock (Rojo), 1: Shifts (Verde), 2: Extras (Naranja)
+    let editMode = 0; 
     let fechaExtraActiva = "";
+
+    // === FUNCIONES MATEMÁTICAS SEGURAS (ANTI-CRASH) ===
+    function fmtN(n) { let v = Number(n); if(isNaN(v)) v = 0; return v.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function fmtM(n) { let v = Number(n); if(isNaN(v)) v = 0; return v.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('btnInstall').style.display = 'block'; });
     function instalarApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); } else { alert("Usa el menú del navegador: 'Añadir a pantalla principal'"); } }
 
-    function forzarActualizacion() {
-        if(confirm("¿Forzar actualización a la última versión de GitHub? Tus datos guardados NO se perderán.")) {
-            if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
-            if ('caches' in window) caches.keys().then(k => Promise.all(k.map(key => caches.delete(key)))).then(() => window.location.href = window.location.pathname + '?v=' + new Date().getTime());
-            else window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+    async function forzarActualizacion() {
+        if(confirm("¿Forzar actualización a la última versión de GitHub? Tus datos NO se perderán.\n\nIMPORTANTE: Si acabas de subir el archivo a GitHub, espera 3 minutos antes de darle a Aceptar o descargarás la versión vieja de nuevo.")) {
+            document.getElementById('btnForzarAct').innerText = "⏳ PURGANDO CACHÉ...";
+            document.getElementById('btnForzarAct').style.background = "#d32f2f";
+            try {
+                if ('serviceWorker' in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); for(let reg of regs) { await reg.unregister(); } }
+                if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+                document.getElementById('btnForzarAct').innerText = "✅ RECARGANDO...";
+                setTimeout(() => { window.location.replace(window.location.pathname + '?v=' + new Date().getTime()); }, 500);
+            } catch(e) { alert("Error borrando caché profundo. Recargando de emergencia."); window.location.reload(true); }
         }
     }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            const swCode = `const CACHE_NAME='stellantis-pwa-v1';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll([location.href])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(res=>res||fetch(e.request).then(fRes=>caches.open(CACHE_NAME).then(c=>{if(e.request.url.startsWith('http'))c.put(e.request,fRes.clone());return fRes;}))).catch(()=>caches.match(location.href)));});`;
+            const swCode = `const CACHE_NAME='stellantis-pwa-v1';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll([location.href.split('?')[0]])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(res=>res||fetch(e.request).then(fRes=>caches.open(CACHE_NAME).then(c=>{if(e.request.url.startsWith('http'))c.put(e.request,fRes.clone());return fRes;}))).catch(()=>caches.match(location.href.split('?')[0])));});`;
             const blob = new Blob([swCode], { type: 'application/javascript' });
             navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.error('Error SW:', err));
         });
@@ -468,7 +477,7 @@
         let conf = getConf(y);
         if (!conf.mesesParams) conf.mesesParams = {};
         if (conf.mesesParams[m]) return conf.mesesParams[m];
-        return { irpf: conf.deduccion || 0, prima: 0, cobrarExtras: false };
+        return { irpf: Number(conf.deduccion) || 0, prima: 0, cobrarExtras: false };
     }
 
     function aplicarNuevosDatos(p) {
@@ -576,7 +585,7 @@
         document.getElementById('resNoches').innerText = cN;
         document.getElementById('resFestivos').innerText = cF;
         document.getElementById('resLibres').innerText = totalDias - cT;
-        document.getElementById('statBolsa').innerText = (conf.bolsa || 0).toFixed(1) + "h";
+        document.getElementById('statBolsa').innerText = (Number(conf.bolsa) || 0).toFixed(1) + "h";
         document.getElementById('statBolsaSub').innerText = y;
         
         calcularGlobales(y, conf);
@@ -608,7 +617,6 @@
         renderCalendario();
     }
 
-    // MOTOR ITERATIVO MENSUAL (Corrige el fallo del IRPF Anual)
     function simularMes(y, m, conf) {
         let params = getMesParams(y, m);
         let cN=0, cF=0, hEx=0;
@@ -620,35 +628,40 @@
             if(horasExtra[k]) hEx += horasExtra[k];
         }
         let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
-        let base = conf.salario; let impN = hNoche * conf.noche; let impG = hGarantia * conf.garantia; let impF = hFestivo * conf.festivo;
-        let impPE = (m===6||m===12) ? conf.pagaExtra : 0;
-        let impO = conf.otros;
-        let impEx = params.cobrarExtras ? (hEx * (conf.precioExtra || 20)) : 0;
-        let impPr = params.prima;
+        
+        // CÁLCULO BLINDADO (Evita NaN)
+        let base = Number(conf.salario) || 0; 
+        let impN = hNoche * (Number(conf.noche) || 0); 
+        let impG = hGarantia * (Number(conf.garantia) || 0); 
+        let impF = hFestivo * (Number(conf.festivo) || 0);
+        let impPE = (m===6||m===12) ? (Number(conf.pagaExtra) || 0) : 0;
+        let impO = Number(conf.otros) || 0;
+        let impEx = params.cobrarExtras ? (hEx * (Number(conf.precioExtra) || 20)) : 0;
+        let impPr = Number(params.prima) || 0;
+        
         let bruto = base + impN + impG + impF + impPE + impO + impEx + impPr;
-        let deduccion = bruto * params.irpf;
+        let deduccion = bruto * (Number(params.irpf) || 0);
         let neto = bruto - deduccion;
         return { bruto, neto };
     }
 
     function calcularGlobales(year, conf) {
-        let diasT=0, cVacAnual=0, cConvAnual=0, cAdecAnual=0; let hExtraAnual = conf.extraBase || 0;
+        let diasT=0, cVacAnual=0, cConvAnual=0, cAdecAnual=0; let hExtraAnual = Number(conf.extraBase) || 0;
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
                 if(est===1 || est===2 || est===6) diasT++;
                 if(est===3) cVacAnual++; if(est===4) cConvAnual++; if(est===5) cAdecAnual++;
             }
         }
-        for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += val; }
+        for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += Number(val)||0; }
         
         document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hExtraAnual).toFixed(1) + "h";
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
         document.getElementById('statVacaciones').innerText = cVacAnual;
         document.getElementById('statConvenio').innerText = cConvAnual;
         document.getElementById('statAdecuacion').innerText = cAdecAnual;
-        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${conf.adecTotal || 8})`;
+        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${Number(conf.adecTotal) || 8})`;
 
-        // Iteración Anual Exacta
         let sumBruto = 0, sumNeto = 0;
         for (let m=1; m<=12; m++) {
             let res = simularMes(year, m, conf);
@@ -672,12 +685,18 @@
         for(let d=1; d<=daysInMonth; d++) {
             let k = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             let v = datosGuardados[k] || 0; if(v===1) cN++; if(v===2) { cN++; cF++; }
-            if(horasExtra[k]) hExtraMes += horasExtra[k];
+            if(horasExtra[k]) hExtraMes += Number(horasExtra[k])||0;
         }
 
         let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
-        let impBase = conf.salario; let impNoche = hNoche * conf.noche; let impGarantia = hGarantia * conf.garantia; let impFestivo = hFestivo * conf.festivo;
-        let impOtros = conf.otros || 0; let impPagaExtra = (month === 6 || month === 12) ? conf.pagaExtra : 0;
+        
+        // RENDER BLINDADO
+        let impBase = Number(conf.salario) || 0; 
+        let impNoche = hNoche * (Number(conf.noche) || 0); 
+        let impGarantia = hGarantia * (Number(conf.garantia) || 0); 
+        let impFestivo = hFestivo * (Number(conf.festivo) || 0);
+        let impOtros = Number(conf.otros) || 0; 
+        let impPagaExtra = (month === 6 || month === 12) ? (Number(conf.pagaExtra) || 0) : 0;
         
         let rowPagaExtra = impPagaExtra > 0 ? `<tr><td>Paga Extra ${month===6?'Junio':'Navidad'}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>` : "";
         let rowOtros = impOtros > 0 ? `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>` : "";
@@ -685,18 +704,18 @@
         let impExtras = 0; let rowExtras = "";
         if(hExtraMes !== 0) {
             if (params.cobrarExtras) {
-                impExtras = hExtraMes * (conf.precioExtra || 20);
+                impExtras = hExtraMes * (Number(conf.precioExtra) || 20);
                 rowExtras = `<tr><td>Horas Extra (Cobradas)</td><td>${hExtraMes.toFixed(2)}</td><td>${fmtM(conf.precioExtra || 20)} €</td><td>${fmtM(impExtras)} €</td></tr>`;
             } else {
                 rowExtras = `<tr><td>Horas Extra (A Bolsa)</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(0,00 €)</td></tr>`;
             }
         }
         
-        let valPrima = params.prima || 0;
+        let valPrima = Number(params.prima) || 0;
         let rowPrima = valPrima !== 0 ? `<tr><td>Prima / Conceptos Atípicos</td><td>1.00</td><td>-</td><td>${fmtM(valPrima)} €</td></tr>` : "";
 
         let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros + impExtras + valPrima;
-        let totalDeduccion = totalBruto * params.irpf;
+        let totalDeduccion = totalBruto * (Number(params.irpf) || 0);
         let liquido = totalBruto - totalDeduccion;
 
         let html = `
