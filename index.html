@@ -490,7 +490,6 @@
         if(configActual.mesesOtros === undefined) configActual.mesesOtros = 11;
 
         actualizarUIBloqueo();
-        renderCalendario();
     }
 
     function aplicarNuevosDatos(p) {
@@ -521,10 +520,17 @@
         actualizarUIBloqueo();
     }
 
+    // NUEVA LÓGICA DE COLORES Y GIRO DEL CANDADO
     function actualizarUIBloqueo() {
         const btn = document.getElementById('btnLock');
-        btn.innerText = isLocked ? '🔒' : '🔓';
-        btn.style.backgroundColor = isLocked ? '#2a2a2a' : '#8b0000'; 
+        if (isLocked) {
+            btn.innerHTML = '🔒';
+            btn.style.backgroundColor = '#d32f2f'; // Rojo oscuro (Bloqueado)
+        } else {
+            // El span con scaleX(-1) gira el candado horizontalmente
+            btn.innerHTML = '<span style="display:inline-block; transform: scaleX(-1);">🔓</span>';
+            btn.style.backgroundColor = '#00e676'; // Verde (Abierto)
+        }
         renderCalendario(); 
     }
 
