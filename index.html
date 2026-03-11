@@ -155,6 +155,14 @@
             .calendar-container { height: calc(100vh - 60px); overflow-y: scroll !important; -webkit-overflow-scrolling: touch; }
             .day-cell { min-height: 90px; }
         }
+
+        /* ESTILOS PARA EXPORTACIÓN A PDF MODO AUDITOR */
+        @media print {
+            body * { visibility: hidden; }
+            .nomina-sheet, .nomina-sheet * { visibility: visible; }
+            .nomina-sheet { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .btn-save, .tabs, .header, .modal-content h3 { display: none !important; }
+        }
     </style></head><body>
 
     <div id="app-container">
@@ -241,11 +249,29 @@
             </div>
 
             <div id="tab-nomina" class="tab-content active">
-                <label style="font-size:0.8rem; color:#aaa;">SELECCIONAR MES:</label>
-                <select id="nominaMonthSelector" class="nom-selector" onchange="renderNominaDetallada()"></select>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; color:#aaa;">MES:</label>
+                        <select id="nominaMonthSelector" class="nom-selector" style="margin-bottom:0;" onchange="renderNominaDetallada()"></select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; color:#aaa;">% IRPF+SS DEL MES:</label>
+                        <input type="number" id="overrideDeduccion" class="nom-selector" style="margin-bottom:0;" step="0.0001" onchange="renderNominaDetallada()">
+                    </div>
+                </div>
                 
-                <div class="nomina-sheet">
-                    <div class="nomina-header">SIMULACIÓN NÓMINA</div>
+                <div style="display:flex; align-items:center; margin-bottom:10px; background:#222; padding:8px; border-radius:4px; gap:10px;">
+                    <input type="checkbox" id="cobrarExtrasCb" onchange="renderNominaDetallada()" style="transform:scale(1.5); margin-left:5px;">
+                    <label style="font-size:0.85rem; color:#fff; font-weight:bold;">Cobrar Horas Extra este mes (Si no, a Bolsa)</label>
+                </div>
+
+                <div style="margin-bottom:15px; background:#222; padding:8px; border-radius:4px;">
+                    <label style="font-size:0.8rem; color:#aaa; display:block; margin-bottom:4px;">PRIMA / ATRASOS DEL MES (€):</label>
+                    <input type="number" id="primaMes" class="nom-selector" style="margin-bottom:0;" step="0.01" placeholder="Ej: 1200.50" onchange="renderNominaDetallada()">
+                </div>
+                
+                <div class="nomina-sheet" id="nominaPrintArea">
+                    <div class="nomina-header">SIMULACIÓN NÓMINA <span id="printMesLbl"></span></div>
                     <table class="nomina-table">
                         <thead><tr><th>CONCEPTO</th><th>UNID.</th><th>PRECIO</th><th>TOTAL</th></tr></thead>
                         <tbody id="nominaBody"></tbody>
@@ -257,8 +283,10 @@
                     </div>
                 </div>
 
+                <button class="btn-save" style="background:#00e676; color:#000; margin-top:15px;" onclick="window.print()">🖨️ EXPORTAR PDF / IMPRIMIR</button>
+
                 <div style="background:#000; padding:15px; margin-top:20px; border-radius:8px; text-align:center; border: 1px solid #333;">
-                    <span style="font-size:0.8rem; color:#aaa; letter-spacing:1px; text-transform:uppercase;">Bruto Anual Estimado</span>
+                    <span style="font-size:0.8rem; color:#aaa; letter-spacing:1px; text-transform:uppercase;">Bruto Anual Estimado (Base)</span>
                     <div id="statTotalEurosConfig" style="font-size:1.8rem; color:var(--color-total); font-weight:900; margin-top:5px;">0 €</div>
                     <div id="statTotalNetoAnual" style="font-size:1rem; color:#888; font-weight:bold; margin-top:5px; border-top:1px solid #333; padding-top:5px;">0 € (Neto Estimado)</div>
                 </div>
@@ -291,6 +319,11 @@
                     <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>KA9</b>.</span>
                 </div>
                 <div class="config-row">
+                    <label>Hora Extra (€):</label>
+                    <input type="number" id="confPrecioExtra" step="0.01">
+                    <span class="help-text">⏱️ Precio al que te pagan la hora extra si decides cobrarla.</span>
+                </div>
+                <div class="config-row">
                     <label>Otros Complementos (K70, etc.):</label>
                     <input type="number" id="confOtros" step="0.01">
                     <span class="help-text">💶 Importes fijos extra como el K70.</span>
@@ -298,10 +331,9 @@
                 <div class="config-row">
                     <label>Meses de cobro (Otros):</label>
                     <input type="number" id="confMesesOtros" step="1" min="0" max="12">
-                    <span class="help-text">📅 Cuántos meses al año cobras el complemento anterior (Ej: 11).</span>
                 </div>
                 <div class="config-row">
-                    <label>% IRPF + SS:</label>
+                    <label>% IRPF + SS (Base Anual):</label>
                     <input type="number" id="confDeduccion" step="0.0001">
                     <span class="help-text">🧮 Ej: 20.59% IRPF + 6.50% SS = Pon <b>0.2709</b></span>
                 </div>
@@ -356,7 +388,7 @@
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V37 ULTIMATE</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V38 AUDITOR</div>
             </div>
         </div>
     </div>
@@ -374,9 +406,8 @@
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
     
-    // DICCIONARIO HISTÓRICO DE PRECIOS POR AÑO
     let configAnual = {}; 
-    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11 };
+    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11, precioExtra: 20.00 };
     
     let editMode = 0; // 0: Lock (Rojo), 1: Shifts (Verde), 2: Extras (Naranja)
 
@@ -455,7 +486,6 @@
         if (savedConf) {
             let parsed = JSON.parse(savedConf);
             if (parsed.salario !== undefined) {
-                // Migración automática de versión plana (V36) a diccionario por año (V37)
                 let curY = new Date().getFullYear();
                 configAnual[curY] = parsed;
             } else {
@@ -528,7 +558,6 @@
         return Math.round((date2 - date1) / (1000*60*60*24));
     }
 
-    // GESTIÓN DEL TRIPLE MODO (Candado -> Turnos -> Extras)
     function toggleLock() {
         editMode = (editMode + 1) % 3;
         actualizarUIBloqueo();
@@ -537,7 +566,6 @@
     function activarModoExtras() {
         editMode = 2;
         actualizarUIBloqueo();
-        alert("⏱️ MODO EXTRAS ACTIVADO\nToca directamente cualquier día en el calendario inferior para anotar tus horas extras.");
     }
 
     function actualizarUIBloqueo() {
@@ -767,10 +795,20 @@
 
     function renderNominaDetallada() {
         const selVal = document.getElementById('nominaMonthSelector').value; 
+        if(!selVal) return;
         const [yearStr, monthStr] = selVal.split('-');
         const year = parseInt(yearStr);
         const month = parseInt(monthStr);
         const conf = getConf(year);
+
+        // Mostrar mes en header para PDF
+        const mesesNombres = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+        document.getElementById('printMesLbl').innerText = `- ${mesesNombres[month-1]} ${year}`;
+
+        // IRPF Dinámico del mes
+        let dedInput = document.getElementById('overrideDeduccion');
+        if (dedInput.value === "") dedInput.value = conf.deduccion || 0;
+        let dedMes = parseFloat(dedInput.value);
 
         let cN = 0, cF = 0, hExtraMes = 0;
         const daysInMonth = new Date(year, month, 0).getDate();
@@ -801,9 +839,17 @@
             rowPagaExtra = `<tr><td>${label}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>`;
         }
 
+        // Extras Financieras
+        let impExtras = 0;
         let rowExtras = "";
+        let cobrarExtras = document.getElementById('cobrarExtrasCb').checked;
         if(hExtraMes !== 0) {
-            rowExtras = `<tr><td>Horas Extra Realizadas</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(Pend. Pago)</td></tr>`;
+            if (cobrarExtras) {
+                impExtras = hExtraMes * (conf.precioExtra || 20);
+                rowExtras = `<tr><td>Horas Extra (Cobradas)</td><td>${hExtraMes.toFixed(2)}</td><td>${fmtM(conf.precioExtra || 20)} €</td><td>${fmtM(impExtras)} €</td></tr>`;
+            } else {
+                rowExtras = `<tr><td>Horas Extra (A Bolsa)</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(0,00 €)</td></tr>`;
+            }
         }
         
         let rowOtros = "";
@@ -811,8 +857,15 @@
             rowOtros = `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>`;
         }
 
-        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros;
-        let totalDeduccion = totalBruto * conf.deduccion;
+        // Primas / Atrasos
+        let valPrima = parseFloat(document.getElementById('primaMes').value) || 0;
+        let rowPrima = "";
+        if (valPrima !== 0) {
+            rowPrima = `<tr><td>Prima / Conceptos Atípicos</td><td>1.00</td><td>-</td><td>${fmtM(valPrima)} €</td></tr>`;
+        }
+
+        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros + impExtras + valPrima;
+        let totalDeduccion = totalBruto * dedMes;
         let liquido = totalBruto - totalDeduccion;
 
         let html = `
@@ -823,6 +876,7 @@
             <tr><td>Festivo (KA9)</td><td>${fmtN(hFestivo)}</td><td>${fmtM(conf.festivo)} €</td><td>${fmtM(impFestivo)} €</td></tr>
             ${rowOtros}
             ${rowExtras}
+            ${rowPrima}
         `;
 
         document.getElementById('nominaBody').innerHTML = html;
@@ -848,8 +902,16 @@
         document.getElementById('configModal').style.display='flex'; 
         document.getElementById('globalConfYear').value = fechaActual.getFullYear();
         document.getElementById('applyYear').value = fechaActual.getFullYear();
+        
         cargarConfigUI();
         initMonthSelector(); 
+        
+        // Resetear overrides visuales de nómina al abrir
+        document.getElementById('overrideDeduccion').value = "";
+        document.getElementById('primaMes').value = "";
+        document.getElementById('cobrarExtrasCb').checked = false;
+
+        renderNominaDetallada(); 
         renderEditorGrid(); 
     }
     
@@ -862,12 +924,16 @@
         document.getElementById('confNoche').value = conf.noche || 0;
         document.getElementById('confGarantia').value = conf.garantia || 0;
         document.getElementById('confFestivo').value = conf.festivo || 0;
+        document.getElementById('confPrecioExtra').value = conf.precioExtra || 20;
         document.getElementById('confOtros').value = conf.otros || 0;
         document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
         document.getElementById('confDeduccion').value = conf.deduccion || 0;
         document.getElementById('confBolsa').value = conf.bolsa || 0;
         document.getElementById('confExtraBase').value = conf.extraBase || 0;
         document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
+        
+        // Al cambiar de año en la UI, reseteamos el override de IRPF para que lea el del nuevo año
+        document.getElementById('overrideDeduccion').value = conf.deduccion || 0;
         
         renderNominaDetallada();
     }
@@ -877,7 +943,7 @@
     function guardarConfig() {
         let y = document.getElementById('globalConfYear').value;
         if (!configAnual[y]) {
-            configAnual[y] = Object.assign({}, getConf(y)); // Hereda del más cercano si es nuevo
+            configAnual[y] = Object.assign({}, getConf(y)); 
         }
         let conf = configAnual[y];
         
@@ -886,6 +952,7 @@
         conf.noche = parseFloat(document.getElementById('confNoche').value) || 0;
         conf.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
         conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
+        conf.precioExtra = parseFloat(document.getElementById('confPrecioExtra').value) || 0;
         conf.otros = parseFloat(document.getElementById('confOtros').value) || 0;
         conf.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
         conf.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
