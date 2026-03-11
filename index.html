@@ -174,7 +174,7 @@
                 <span class="stat-label" style="color:#aaa;">H. TRAB<span class="sub">(1720/AÑO)</span></span>
                 <span class="stat-val" id="statHorasTrabajadas">0h</span>
             </div>
-            <div class="stat-item stat-btn-extra" onclick="abrirExtraModal()" title="Pulsar para añadir o quitar horas extra">
+            <div class="stat-item stat-btn-extra" onclick="activarModoExtras()" title="Pulsar para añadir horas extra rápidamente">
                 <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statHorasExtra">0h</span>
             </div>
@@ -186,8 +186,8 @@
                 <span class="stat-label" style="color:var(--color-adecuacion)">ADEC ✎<span class="sub" id="statAdecSub">(0/8)</span></span>
                 <span class="stat-val" id="statAdecuacion">0</span>
             </div>
-            <div class="stat-item stat-btn-bolsa" onclick="editarBolsaRapida()" title="Pulsar para modificar la Bolsa de Horas Oficial">
-                <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎<span class="sub">&nbsp;</span></span>
+            <div class="stat-item stat-btn-bolsa" onclick="editarBolsaRapida()" title="Pulsar para modificar la Bolsa de Horas Oficial del Año">
+                <span class="stat-label" style="color:var(--color-bolsa)">BOLSA ✎<span class="sub" id="statBolsaSub">2026</span></span>
                 <span class="stat-val" id="statBolsa">0h</span>
             </div>
             <div class="stat-item">
@@ -229,7 +229,10 @@
     <div id="configModal" class="modal">
         <div class="modal-content">
             <button style="float:right; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;" onclick="cerrarConfig()">&times;</button>
-            <h3 style="margin-top:0;">CONFIGURACIÓN</h3>
+            <h3 style="margin-top:0; display:flex; align-items:center;">
+                ⚙️ AÑO: 
+                <input type="number" id="globalConfYear" style="width:80px; background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; margin-left:10px; font-size:1.2rem; text-align:center;" onchange="cargarConfigUI()">
+            </h3>
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('tab-nomina')">NÓMINA</div>
                 <div class="tab" onclick="switchTab('tab-precios')">PRECIOS</div>
@@ -290,19 +293,19 @@
                 <div class="config-row">
                     <label>Otros Complementos (K70, etc.):</label>
                     <input type="number" id="confOtros" step="0.01">
-                    <span class="help-text">💶 Importes fijos extra como el K70 (Complemento descanso).</span>
+                    <span class="help-text">💶 Importes fijos extra como el K70.</span>
                 </div>
                 <div class="config-row">
                     <label>Meses de cobro (Otros):</label>
                     <input type="number" id="confMesesOtros" step="1" min="0" max="12">
-                    <span class="help-text">📅 Cuántos meses al año cobras los "Otros Complementos" (Por defecto: 11).</span>
+                    <span class="help-text">📅 Cuántos meses al año cobras el complemento anterior (Ej: 11).</span>
                 </div>
                 <div class="config-row">
                     <label>% IRPF + SS:</label>
                     <input type="number" id="confDeduccion" step="0.0001">
                     <span class="help-text">🧮 Ej: 20.59% IRPF + 6.50% SS = Pon <b>0.2709</b></span>
                 </div>
-                <button class="btn-save" onclick="guardarConfig()">GUARDAR PRECIOS</button>
+                <button class="btn-save" onclick="guardarConfig()">GUARDAR DATOS DEL AÑO</button>
             </div>
 
             <div id="tab-turnos" class="tab-content">
@@ -318,11 +321,11 @@
                     <div class="pattern-grid" id="patternGrid"></div>
                 </div>
                 <div class="config-row" style="margin-top:15px;">
-                    <label>Año a rellenar:</label>
+                    <label>Año a rellenar automáticamente:</label>
                     <input type="number" id="applyYear">
                 </div>
-                <button class="btn-save" onclick="aplicarPatron()">APLICAR PATRÓN</button>
-                <button class="btn-save btn-danger" style="margin-top:10px;" onclick="resetearCalendario()">BORRAR AÑO</button>
+                <button class="btn-save" onclick="aplicarPatron()">APLICAR PATRÓN AL AÑO</button>
+                <button class="btn-save btn-danger" style="margin-top:10px;" onclick="resetearCalendario()">BORRAR AÑO COMPLETO</button>
             </div>
 
             <div id="tab-datos" class="tab-content">
@@ -330,47 +333,35 @@
                 <button id="btnInstall" class="btn-save btn-install" onclick="instalarApp()">📲 INSTALAR APP</button>
                 
                 <div class="config-row">
-                    <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial):</label>
+                    <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial del Año):</label>
                     <input type="number" id="confBolsa" step="0.1">
                 </div>
                 
                 <div class="config-row">
-                    <label style="color:var(--color-extra);">HORAS EXTRA (Base/Ajuste manual):</label>
+                    <label style="color:var(--color-extra);">HORAS EXTRA (Base arrastrada):</label>
                     <input type="number" id="confExtraBase" step="0.1">
                 </div>
 
                 <div class="config-row">
-                    <label style="color:var(--color-adecuacion);">SALDO ADEC TOTAL (Días):</label>
+                    <label style="color:var(--color-adecuacion);">SALDO ADEC TOTAL (Días por año):</label>
                     <input type="number" id="confAdecTotal" step="1">
                     <span class="help-text">📉 Días totales anuales (ej: 8) para calcular remanente.</span>
                 </div>
                 
-                <button class="btn-save" onclick="guardarConfig()">ACTUALIZAR CONTADORES</button>
+                <button class="btn-save" onclick="guardarConfig()">GUARDAR DATOS DEL AÑO</button>
                 
                 <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
                 
-                <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA (.JSON)</button>
+                <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
                 
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V36 PRO READY</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V37 ULTIMATE</div>
             </div>
         </div>
     </div>
 
-    <div id="extraModal" class="modal">
-        <div class="modal-content">
-            <h3>⏱️ ANOTAR HORAS EXTRA</h3>
-            <div class="config-row"><label>Fecha:</label><input type="date" id="inputExtraFecha"></div>
-            <div class="config-row">
-                <label>Número de horas a sumar o restar:</label>
-                <input type="number" id="inputExtraValor" step="0.1" placeholder="Ej: 2.5 o -1">
-                <span class="help-text">Pon un número positivo para sumar o uno negativo para restar. Déjalo en blanco o pon 0 para borrar la anotación del día.</span>
-            </div>
-            <button class="btn-save" style="background:var(--color-extra); color:#000;" onclick="guardarExtraDia()">GUARDAR CAMBIOS</button>
-            <button class="btn-save" style="background:#444;" onclick="cerrarExtraModal()">CANCELAR</button>
-        </div>
-    </div><script>
+<script>
     const K_DATA = 'nomina_stellantis_universal_data_v3'; 
     const K_CONF = 'nomina_stellantis_universal_config_v4';
     const K_EXTR = 'nomina_stellantis_universal_extras_diarias_v1';
@@ -382,8 +373,12 @@
     let datosGuardados = {}; 
     let horasExtra = {}; 
     let patronPlano = new Array(42).fill(0);
-    let configActual = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 0, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11 };
-    let isLocked = true;
+    
+    // DICCIONARIO HISTÓRICO DE PRECIOS POR AÑO
+    let configAnual = {}; 
+    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11 };
+    
+    let editMode = 0; // 0: Lock (Rojo), 1: Shifts (Verde), 2: Extras (Naranja)
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -453,9 +448,22 @@
         let hayDatosLocales = false;
         
         if(localStorage.getItem(K_DATA)) { datosGuardados = JSON.parse(localStorage.getItem(K_DATA)); hayDatosLocales = true; }
-        if(localStorage.getItem(K_CONF)) configActual = JSON.parse(localStorage.getItem(K_CONF));
         if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
         if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
+        
+        let savedConf = localStorage.getItem(K_CONF);
+        if (savedConf) {
+            let parsed = JSON.parse(savedConf);
+            if (parsed.salario !== undefined) {
+                // Migración automática de versión plana (V36) a diccionario por año (V37)
+                let curY = new Date().getFullYear();
+                configAnual[curY] = parsed;
+            } else {
+                configAnual = parsed;
+            }
+        } else {
+            configAnual[new Date().getFullYear()] = Object.assign({}, defaultConf);
+        }
         
         try {
             const res = await fetch(CLOUD_URL + '?t=' + Date.now());
@@ -474,31 +482,36 @@
         let savedStart = localStorage.getItem(K_START);
         if(!savedStart) savedStart = "2026-01-01";
         document.getElementById('cycleStartDate').value = savedStart;
-        
-        if(configActual.bolsa === undefined) configActual.bolsa = 0;
-        document.getElementById('confBolsa').value = configActual.bolsa;
-        
-        if(configActual.extraBase === undefined) configActual.extraBase = 0;
-        document.getElementById('confExtraBase').value = configActual.extraBase;
-
-        if(configActual.otros === undefined) configActual.otros = 16.96;
-        document.getElementById('confOtros').value = configActual.otros;
-
-        if(configActual.adecTotal === undefined) configActual.adecTotal = 8;
-        document.getElementById('confAdecTotal').value = configActual.adecTotal;
-        
-        if(configActual.mesesOtros === undefined) configActual.mesesOtros = 11;
 
         actualizarUIBloqueo();
+        renderCalendario();
+    }
+
+    function getConf(y) {
+        if (configAnual[y]) return configAnual[y];
+        let years = Object.keys(configAnual).map(Number).sort((a,b)=>b-a);
+        if (years.length === 0) return Object.assign({}, defaultConf);
+        let closest = years.find(yr => yr <= y) || years[years.length-1];
+        return configAnual[closest];
     }
 
     function aplicarNuevosDatos(p) {
         if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
-        if(p.config) configActual = p.config; else if(p.c) configActual = p.c;
         if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
         if(p.patron) patronPlano = p.patron;
+        
+        if(p.configAnual) {
+            configAnual = p.configAnual;
+        } else if(p.config) {
+            if(p.config.salario !== undefined) {
+                configAnual[new Date().getFullYear()] = p.config;
+            } else {
+                configAnual = p.config;
+            }
+        }
+
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
-        localStorage.setItem(K_CONF, JSON.stringify(configActual));
+        localStorage.setItem(K_CONF, JSON.stringify(configAnual));
         localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
         localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
         if(p.start) localStorage.setItem(K_START, p.start);
@@ -515,21 +528,32 @@
         return Math.round((date2 - date1) / (1000*60*60*24));
     }
 
+    // GESTIÓN DEL TRIPLE MODO (Candado -> Turnos -> Extras)
     function toggleLock() {
-        isLocked = !isLocked;
+        editMode = (editMode + 1) % 3;
         actualizarUIBloqueo();
     }
+    
+    function activarModoExtras() {
+        editMode = 2;
+        actualizarUIBloqueo();
+        alert("⏱️ MODO EXTRAS ACTIVADO\nToca directamente cualquier día en el calendario inferior para anotar tus horas extras.");
+    }
 
-    // NUEVA LÓGICA DE COLORES Y GIRO DEL CANDADO
     function actualizarUIBloqueo() {
         const btn = document.getElementById('btnLock');
-        if (isLocked) {
+        if (editMode === 0) {
             btn.innerHTML = '🔒';
-            btn.style.backgroundColor = '#d32f2f'; // Rojo oscuro (Bloqueado)
-        } else {
-            // El span con scaleX(-1) gira el candado horizontalmente
+            btn.style.backgroundColor = '#d32f2f'; // Rojo
+            btn.title = "Bloqueado (Pulsa para editar Turnos)";
+        } else if (editMode === 1) {
             btn.innerHTML = '<span style="display:inline-block; transform: scaleX(-1);">🔓</span>';
-            btn.style.backgroundColor = '#00e676'; // Verde (Abierto)
+            btn.style.backgroundColor = '#00e676'; // Verde
+            btn.title = "Modo Turnos (Pulsa para Extras)";
+        } else {
+            btn.innerHTML = '⏱️';
+            btn.style.backgroundColor = '#ff9100'; // Naranja
+            btn.title = "Modo Extras (Pulsa para Bloquear)";
         }
         renderCalendario(); 
     }
@@ -645,31 +669,48 @@
             const div = document.createElement('div');
             div.className = `day-cell ${cls}`;
             if (item.tenue) div.style.opacity = '0.35'; 
-            div.style.cursor = isLocked ? 'default' : 'pointer'; 
+            div.style.cursor = editMode === 0 ? 'default' : 'pointer'; 
             
             if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
             if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
             div.innerHTML += `<div class="day-num">${fd}</div><div class="day-label">${txt}</div>`;
             
             div.onclick = () => {
-                if (isLocked) {
+                if (editMode === 0) {
                     const btn = document.getElementById('btnLock');
                     btn.style.transform = 'scale(1.2)';
                     setTimeout(() => btn.style.transform = 'scale(1)', 150);
                     return;
                 }
-                toggleDia(k);
+                if (editMode === 1) {
+                    toggleDia(k);
+                } else if (editMode === 2) {
+                    let prev = horasExtra[k] || "";
+                    let val = prompt(`⏱️ HORAS EXTRA (${fd}/${fm+1}/${fy})\nEscribe las horas (ej: 2.5 o -1). Deja vacío para borrar:`, prev);
+                    if (val !== null) {
+                        let parsed = parseFloat(val.replace(',', '.'));
+                        if (isNaN(parsed) || parsed === 0) {
+                            delete horasExtra[k];
+                        } else {
+                            horasExtra[k] = parsed;
+                        }
+                        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
+                        renderCalendario();
+                    }
+                }
             };
             c.appendChild(div);
         });
         
+        let conf = getConf(y);
         document.getElementById('resTrabajados').innerText = cT;
         document.getElementById('resNoches').innerText = cN;
         document.getElementById('resFestivos').innerText = cF;
         document.getElementById('resLibres').innerText = totalDias - cT;
-        document.getElementById('statBolsa').innerText = (configActual.bolsa || 0).toFixed(1) + "h";
+        document.getElementById('statBolsa').innerText = (conf.bolsa || 0).toFixed(1) + "h";
+        document.getElementById('statBolsaSub').innerText = y;
         
-        calcularGlobales(y);
+        calcularGlobales(y, conf);
     }
 
     function toggleDia(k) {
@@ -679,10 +720,10 @@
         renderCalendario();
     }
 
-    function calcularGlobales(year) {
+    function calcularGlobales(year, conf) {
         let diasT=0, nochesAnuales=0, festivosAnuales=0;
         let cVacAnual=0, cConvAnual=0, cAdecAnual=0;
-        let hExtraAnual = configActual.extraBase || 0;
+        let hExtraAnual = conf.extraBase || 0;
 
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
@@ -704,18 +745,18 @@
         document.getElementById('statConvenio').innerText = cConvAnual;
         
         document.getElementById('statAdecuacion').innerText = cAdecAnual;
-        const totalAdec = configActual.adecTotal || 8;
+        const totalAdec = conf.adecTotal || 8;
         document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${totalAdec})`;
 
-        let brutoAnual = (configActual.salario * 12) + (configActual.pagaExtra * 2);
-        brutoAnual += (nochesAnuales * 7.75 * configActual.noche);
-        brutoAnual += (nochesAnuales * 3.875 * configActual.garantia);
-        brutoAnual += (festivosAnuales * 7.75 * configActual.festivo);
+        let brutoAnual = (conf.salario * 12) + (conf.pagaExtra * 2);
+        brutoAnual += (nochesAnuales * 7.75 * conf.noche);
+        brutoAnual += (nochesAnuales * 3.875 * conf.garantia);
+        brutoAnual += (festivosAnuales * 7.75 * conf.festivo);
         
-        let mesesCobro = configActual.mesesOtros !== undefined ? configActual.mesesOtros : 11;
-        brutoAnual += ((configActual.otros || 0) * mesesCobro); 
+        let mesesCobro = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
+        brutoAnual += ((conf.otros || 0) * mesesCobro); 
         
-        let netoAnual = brutoAnual * (1 - configActual.deduccion);
+        let netoAnual = brutoAnual * (1 - conf.deduccion);
 
         document.getElementById('statTotalEurosConfig').innerText = fmtM(brutoAnual) + " €";
         document.getElementById('statTotalNetoAnual').innerText = fmtM(netoAnual) + " € (Neto Estimado)";
@@ -729,6 +770,7 @@
         const [yearStr, monthStr] = selVal.split('-');
         const year = parseInt(yearStr);
         const month = parseInt(monthStr);
+        const conf = getConf(year);
 
         let cN = 0, cF = 0, hExtraMes = 0;
         const daysInMonth = new Date(year, month, 0).getDate();
@@ -745,18 +787,18 @@
         let hGarantia = hNoche / 2;
         let hFestivo = cF * 7.75;
 
-        let impBase = configActual.salario;
-        let impNoche = hNoche * configActual.noche;
-        let impGarantia = hGarantia * configActual.garantia;
-        let impFestivo = hFestivo * configActual.festivo;
-        let impOtros = configActual.otros || 0;
+        let impBase = conf.salario;
+        let impNoche = hNoche * conf.noche;
+        let impGarantia = hGarantia * conf.garantia;
+        let impFestivo = hFestivo * conf.festivo;
+        let impOtros = conf.otros || 0;
         
         let impPagaExtra = 0;
         let rowPagaExtra = "";
         if (month === 6 || month === 12) {
-            impPagaExtra = configActual.pagaExtra;
+            impPagaExtra = conf.pagaExtra;
             let label = month === 6 ? "Paga Extra Junio" : "Paga Extra Navidad";
-            rowPagaExtra = `<tr><td>${label}</td><td>1.00</td><td>${fmtM(configActual.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>`;
+            rowPagaExtra = `<tr><td>${label}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>`;
         }
 
         let rowExtras = "";
@@ -770,15 +812,15 @@
         }
 
         let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros;
-        let totalDeduccion = totalBruto * configActual.deduccion;
+        let totalDeduccion = totalBruto * conf.deduccion;
         let liquido = totalBruto - totalDeduccion;
 
         let html = `
             <tr><td>Salario Base</td><td>30.00</td><td>-</td><td>${fmtM(impBase)} €</td></tr>
             ${rowPagaExtra}
-            <tr><td>Plus Nocturnidad (K05)</td><td>${fmtN(hNoche)}</td><td>${fmtM(configActual.noche)} €</td><td>${fmtM(impNoche)} €</td></tr>
-            <tr><td>Garantía (K75)</td><td>${fmtN(hGarantia)}</td><td>${fmtM(configActual.garantia)} €</td><td>${fmtM(impGarantia)} €</td></tr>
-            <tr><td>Festivo (KA9)</td><td>${fmtN(hFestivo)}</td><td>${fmtM(configActual.festivo)} €</td><td>${fmtM(impFestivo)} €</td></tr>
+            <tr><td>Plus Nocturnidad (K05)</td><td>${fmtN(hNoche)}</td><td>${fmtM(conf.noche)} €</td><td>${fmtM(impNoche)} €</td></tr>
+            <tr><td>Garantía (K75)</td><td>${fmtN(hGarantia)}</td><td>${fmtM(conf.garantia)} €</td><td>${fmtM(impGarantia)} €</td></tr>
+            <tr><td>Festivo (KA9)</td><td>${fmtN(hFestivo)}</td><td>${fmtM(conf.festivo)} €</td><td>${fmtM(impFestivo)} €</td></tr>
             ${rowOtros}
             ${rowExtras}
         `;
@@ -795,52 +837,65 @@
         const meses = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
         for(let i=0; i<12; i++) {
             let opt = document.createElement('option');
-            opt.value = `2026-${String(i+1).padStart(2,'0')}`;
-            opt.text = meses[i] + " 2026";
+            opt.value = `${fechaActual.getFullYear()}-${String(i+1).padStart(2,'0')}`;
+            opt.text = meses[i] + " " + fechaActual.getFullYear();
             sel.appendChild(opt);
         }
-        sel.value = `2026-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
+        sel.value = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
     }
 
     function abrirConfig() { 
         document.getElementById('configModal').style.display='flex'; 
-        
-        document.getElementById('confSalario').value = configActual.salario;
-        document.getElementById('confPagaExtra').value = configActual.pagaExtra;
-        document.getElementById('confNoche').value = configActual.noche;
-        document.getElementById('confGarantia').value = configActual.garantia;
-        document.getElementById('confFestivo').value = configActual.festivo;
-        document.getElementById('confOtros').value = configActual.otros || 0;
-        document.getElementById('confMesesOtros').value = configActual.mesesOtros !== undefined ? configActual.mesesOtros : 11;
-        document.getElementById('confDeduccion').value = configActual.deduccion;
-        document.getElementById('confBolsa').value = configActual.bolsa || 0;
-        document.getElementById('confExtraBase').value = configActual.extraBase || 0;
-        document.getElementById('confAdecTotal').value = configActual.adecTotal || 8;
-        
+        document.getElementById('globalConfYear').value = fechaActual.getFullYear();
         document.getElementById('applyYear').value = fechaActual.getFullYear();
-
+        cargarConfigUI();
         initMonthSelector(); 
-        renderNominaDetallada(); 
         renderEditorGrid(); 
     }
     
+    function cargarConfigUI() {
+        let y = document.getElementById('globalConfYear').value;
+        let conf = getConf(y);
+        
+        document.getElementById('confSalario').value = conf.salario || 0;
+        document.getElementById('confPagaExtra').value = conf.pagaExtra || 0;
+        document.getElementById('confNoche').value = conf.noche || 0;
+        document.getElementById('confGarantia').value = conf.garantia || 0;
+        document.getElementById('confFestivo').value = conf.festivo || 0;
+        document.getElementById('confOtros').value = conf.otros || 0;
+        document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
+        document.getElementById('confDeduccion').value = conf.deduccion || 0;
+        document.getElementById('confBolsa').value = conf.bolsa || 0;
+        document.getElementById('confExtraBase').value = conf.extraBase || 0;
+        document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
+        
+        renderNominaDetallada();
+    }
+
     function cerrarConfig() { document.getElementById('configModal').style.display='none'; }
     
     function guardarConfig() {
-        configActual.salario = parseFloat(document.getElementById('confSalario').value) || 0;
-        configActual.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value) || 0;
-        configActual.noche = parseFloat(document.getElementById('confNoche').value) || 0;
-        configActual.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
-        configActual.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
-        configActual.otros = parseFloat(document.getElementById('confOtros').value) || 0;
-        configActual.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
-        configActual.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
-        configActual.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
-        configActual.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
-        configActual.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
+        let y = document.getElementById('globalConfYear').value;
+        if (!configAnual[y]) {
+            configAnual[y] = Object.assign({}, getConf(y)); // Hereda del más cercano si es nuevo
+        }
+        let conf = configAnual[y];
         
-        localStorage.setItem(K_CONF, JSON.stringify(configActual));
-        renderCalendario(); alert("Guardado correctamente");
+        conf.salario = parseFloat(document.getElementById('confSalario').value) || 0;
+        conf.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value) || 0;
+        conf.noche = parseFloat(document.getElementById('confNoche').value) || 0;
+        conf.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
+        conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
+        conf.otros = parseFloat(document.getElementById('confOtros').value) || 0;
+        conf.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
+        conf.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
+        conf.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
+        conf.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
+        conf.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
+        
+        localStorage.setItem(K_CONF, JSON.stringify(configAnual));
+        renderCalendario(); 
+        alert(`Datos del año ${y} guardados.`);
     }
 
     function switchTab(id) {
@@ -852,14 +907,15 @@
     }
 
     function editarBolsaRapida() {
-        let num = prompt("Introduce el nuevo saldo oficial para la BOLSA DE HORAS:", configActual.bolsa || 0);
+        let curY = fechaActual.getFullYear();
+        let conf = getConf(curY);
+        let num = prompt(`Introduce el saldo oficial de BOLSA DE HORAS para ${curY}:`, conf.bolsa || 0);
         if (num !== null) {
-            let parsed = parseFloat(num);
+            let parsed = parseFloat(num.replace(',', '.'));
             if (!isNaN(parsed)) {
-                configActual.bolsa = parsed;
-                localStorage.setItem(K_CONF, JSON.stringify(configActual));
-                const confBolsaInput = document.getElementById('confBolsa');
-                if(confBolsaInput) confBolsaInput.value = parsed;
+                if(!configAnual[curY]) configAnual[curY] = Object.assign({}, conf);
+                configAnual[curY].bolsa = parsed;
+                localStorage.setItem(K_CONF, JSON.stringify(configAnual));
                 renderCalendario();
             }
         }
@@ -869,34 +925,8 @@
         alert(`⚠️ PROTECCIÓN DE DATOS\n\nNo puedes modificar el total de ${tipo} escribiendo un número arbitrario. Este es un "Total Calculado" derivado del calendario anual.\n\nPara añadir o quitar días, haz clic directamente sobre los días correspondientes en el calendario inferior.`);
     }
 
-    function abrirExtraModal() { 
-        document.getElementById('extraModal').style.display='flex'; 
-        let todayStr = new Date();
-        if (fechaActual.getMonth() !== todayStr.getMonth() || fechaActual.getFullYear() !== todayStr.getFullYear()) {
-            todayStr = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-        }
-        todayStr.setMinutes(todayStr.getMinutes() - todayStr.getTimezoneOffset());
-        document.getElementById('inputExtraFecha').value = todayStr.toISOString().split('T')[0];
-        document.getElementById('inputExtraValor').value = "";
-    }
-    
-    function cerrarExtraModal() { document.getElementById('extraModal').style.display='none'; }
-    
-    function guardarExtraDia() {
-        const f = document.getElementById('inputExtraFecha').value;
-        const v = parseFloat(document.getElementById('inputExtraValor').value);
-        if(!f) return;
-        if(isNaN(v) || v === 0) {
-            delete horasExtra[f];
-        } else {
-            horasExtra[f] = v;
-        }
-        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
-        cerrarExtraModal(); renderCalendario();
-    }
-
     function descargarCopia() {
-        const p = { data: datosGuardados, config: configActual, extras: horasExtra, patron: patronPlano, start: document.getElementById('cycleStartDate').value };
+        const p = { data: datosGuardados, configAnual: configAnual, extras: horasExtra, patron: patronPlano, start: document.getElementById('cycleStartDate').value };
         const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p));
         const a = document.createElement('a'); 
         const dateStr = new Date().toISOString().split('T')[0];
