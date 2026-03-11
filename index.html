@@ -252,22 +252,22 @@
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
                     <div style="flex:1;">
                         <label style="font-size:0.8rem; color:#aaa;">MES:</label>
-                        <select id="nominaMonthSelector" class="nom-selector" style="margin-bottom:0;" onchange="renderNominaDetallada()"></select>
+                        <select id="nominaMonthSelector" class="nom-selector" style="margin-bottom:0;" onchange="cargarConfigUI()"></select>
                     </div>
                     <div style="flex:1;">
                         <label style="font-size:0.8rem; color:#aaa;">% IRPF+SS DEL MES:</label>
-                        <input type="number" id="overrideDeduccion" class="nom-selector" style="margin-bottom:0;" step="0.0001" onchange="renderNominaDetallada()">
+                        <input type="number" id="overrideDeduccion" class="nom-selector" style="margin-bottom:0;" step="0.0001" onchange="guardarDatosMes()">
                     </div>
                 </div>
                 
                 <div style="display:flex; align-items:center; margin-bottom:10px; background:#222; padding:8px; border-radius:4px; gap:10px;">
-                    <input type="checkbox" id="cobrarExtrasCb" onchange="renderNominaDetallada()" style="transform:scale(1.5); margin-left:5px;">
+                    <input type="checkbox" id="cobrarExtrasCb" onchange="guardarDatosMes()" style="transform:scale(1.5); margin-left:5px;">
                     <label style="font-size:0.85rem; color:#fff; font-weight:bold;">Cobrar Horas Extra este mes (Si no, a Bolsa)</label>
                 </div>
 
                 <div style="margin-bottom:15px; background:#222; padding:8px; border-radius:4px;">
                     <label style="font-size:0.8rem; color:#aaa; display:block; margin-bottom:4px;">PRIMA / ATRASOS DEL MES (€):</label>
-                    <input type="number" id="primaMes" class="nom-selector" style="margin-bottom:0;" step="0.01" placeholder="Ej: 1200.50" onchange="renderNominaDetallada()">
+                    <input type="number" id="primaMes" class="nom-selector" style="margin-bottom:0;" step="0.01" placeholder="Ej: 1200.50" onchange="guardarDatosMes()">
                 </div>
                 
                 <div class="nomina-sheet" id="nominaPrintArea">
@@ -286,7 +286,7 @@
                 <button class="btn-save" style="background:#00e676; color:#000; margin-top:15px;" onclick="window.print()">🖨️ EXPORTAR PDF / IMPRIMIR</button>
 
                 <div style="background:#000; padding:15px; margin-top:20px; border-radius:8px; text-align:center; border: 1px solid #333;">
-                    <span style="font-size:0.8rem; color:#aaa; letter-spacing:1px; text-transform:uppercase;">Bruto Anual Estimado (Base)</span>
+                    <span style="font-size:0.8rem; color:#aaa; letter-spacing:1px; text-transform:uppercase;">Bruto Anual Estimado (Iterativo)</span>
                     <div id="statTotalEurosConfig" style="font-size:1.8rem; color:var(--color-total); font-weight:900; margin-top:5px;">0 €</div>
                     <div id="statTotalNetoAnual" style="font-size:1rem; color:#888; font-weight:bold; margin-top:5px; border-top:1px solid #333; padding-top:5px;">0 € (Neto Estimado)</div>
                 </div>
@@ -296,37 +296,30 @@
                 <div class="config-row">
                     <label>Salario Mensual (Base):</label>
                     <input type="number" id="confSalario" step="0.01">
-                    <span class="help-text">🔎 Salario Base de una nómina normal.</span>
                 </div>
                 <div class="config-row">
                     <label>Importe Paga Extra:</label>
                     <input type="number" id="confPagaExtra" step="0.01">
-                    <span class="help-text">🎁 Importe Junio/Diciembre.</span>
                 </div>
                 <div class="config-row">
                     <label>Hora Noche (K05):</label>
                     <input type="number" id="confNoche" step="0.0001">
-                    <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>K05</b>.</span>
                 </div>
                 <div class="config-row">
                     <label>Garantía (K75):</label>
                     <input type="number" id="confGarantia" step="0.0001">
-                    <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>K75</b>.</span>
                 </div>
                 <div class="config-row">
                     <label>Festivo (KA9):</label>
                     <input type="number" id="confFestivo" step="0.0001">
-                    <span class="help-text">🔎 Columna "Precio/Unidad" del concepto <b>KA9</b>.</span>
                 </div>
                 <div class="config-row">
                     <label>Hora Extra (€):</label>
                     <input type="number" id="confPrecioExtra" step="0.01">
-                    <span class="help-text">⏱️ Precio al que te pagan la hora extra si decides cobrarla.</span>
                 </div>
                 <div class="config-row">
                     <label>Otros Complementos (K70, etc.):</label>
                     <input type="number" id="confOtros" step="0.01">
-                    <span class="help-text">💶 Importes fijos extra como el K70.</span>
                 </div>
                 <div class="config-row">
                     <label>Meses de cobro (Otros):</label>
@@ -335,9 +328,8 @@
                 <div class="config-row">
                     <label>% IRPF + SS (Base Anual):</label>
                     <input type="number" id="confDeduccion" step="0.0001">
-                    <span class="help-text">🧮 Ej: 20.59% IRPF + 6.50% SS = Pon <b>0.2709</b></span>
                 </div>
-                <button class="btn-save" onclick="guardarConfig()">GUARDAR DATOS DEL AÑO</button>
+                <button class="btn-save" onclick="guardarConfigAnual()">GUARDAR DATOS DEL AÑO</button>
             </div>
 
             <div id="tab-turnos" class="tab-content">
@@ -363,33 +355,36 @@
             <div id="tab-datos" class="tab-content">
                 <button class="btn-save btn-update" onclick="forzarActualizacion()">🔄 FORZAR ACTUALIZACIÓN APP</button>
                 <button id="btnInstall" class="btn-save btn-install" onclick="instalarApp()">📲 INSTALAR APP</button>
-                
                 <div class="config-row">
                     <label style="color:var(--color-bolsa);">BOLSA DE HORAS (Oficial del Año):</label>
                     <input type="number" id="confBolsa" step="0.1">
                 </div>
-                
                 <div class="config-row">
                     <label style="color:var(--color-extra);">HORAS EXTRA (Base arrastrada):</label>
                     <input type="number" id="confExtraBase" step="0.1">
                 </div>
-
                 <div class="config-row">
                     <label style="color:var(--color-adecuacion);">SALDO ADEC TOTAL (Días por año):</label>
                     <input type="number" id="confAdecTotal" step="1">
-                    <span class="help-text">📉 Días totales anuales (ej: 8) para calcular remanente.</span>
                 </div>
-                
-                <button class="btn-save" onclick="guardarConfig()">GUARDAR DATOS DEL AÑO</button>
-                
+                <button class="btn-save" onclick="guardarConfigAnual()">GUARDAR DATOS DEL AÑO</button>
                 <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-                
                 <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V38 AUDITOR</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V39 AUDITOR PRO</div>
             </div>
+        </div>
+    </div>
+
+    <div id="modalExtraClick" class="modal">
+        <div class="modal-content" style="text-align:center; padding-top:25px; padding-bottom:25px;">
+            <h3 style="margin-top:0; color:var(--color-extra);">⏱️ ANOTAR HORAS EXTRA</h3>
+            <p id="extraFechaTitulo" style="color:#aaa; margin-bottom:20px; font-weight:bold;"></p>
+            <input type="number" id="extraClickValor" step="0.1" placeholder="Ej: 2.5" style="font-size:2rem; text-align:center; margin-bottom:15px; height:60px;">
+            <p class="help-text" style="border:none; text-align:center; padding:0; margin-bottom:20px;">Pon número positivo para sumar o negativo para restar. Deja vacío o en 0 para borrar.</p>
+            <button class="btn-save" style="background:var(--color-extra); color:#000; font-size:1.1rem;" onclick="guardarExtraClick()">GUARDAR CAMBIOS</button>
+            <button class="btn-save" style="background:#444;" onclick="document.getElementById('modalExtraClick').style.display='none'">CANCELAR</button>
         </div>
     </div>
 
@@ -407,77 +402,33 @@
     let patronPlano = new Array(42).fill(0);
     
     let configAnual = {}; 
-    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11, precioExtra: 20.00 };
+    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11, precioExtra: 20.00, mesesParams: {} };
     
     let editMode = 0; // 0: Lock (Rojo), 1: Shifts (Verde), 2: Extras (Naranja)
+    let fechaExtraActiva = "";
 
     let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('btnInstall').style.display = 'block';
-    });
-    
-    function instalarApp() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
-        } else {
-            alert("Usa el menú del navegador: 'Añadir a pantalla principal'");
-        }
-    }
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('btnInstall').style.display = 'block'; });
+    function instalarApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); } else { alert("Usa el menú del navegador: 'Añadir a pantalla principal'"); } }
 
     function forzarActualizacion() {
         if(confirm("¿Forzar actualización a la última versión de GitHub? Tus datos guardados NO se perderán.")) {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) { registration.unregister(); }
-                });
-            }
-            if ('caches' in window) {
-                caches.keys().then((keyList) => {
-                    return Promise.all(keyList.map((key) => caches.delete(key)));
-                }).then(() => {
-                    window.location.href = window.location.pathname + '?v=' + new Date().getTime();
-                });
-            } else {
-                window.location.href = window.location.pathname + '?v=' + new Date().getTime();
-            }
+            if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+            if ('caches' in window) caches.keys().then(k => Promise.all(k.map(key => caches.delete(key)))).then(() => window.location.href = window.location.pathname + '?v=' + new Date().getTime());
+            else window.location.href = window.location.pathname + '?v=' + new Date().getTime();
         }
     }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            const swCode = `
-                const CACHE_NAME = 'stellantis-pwa-v1';
-                self.addEventListener('install', e => {
-                    self.skipWaiting();
-                    e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([location.href])));
-                });
-                self.addEventListener('fetch', e => {
-                    e.respondWith(
-                        caches.match(e.request).then(res => {
-                            return res || fetch(e.request).then(fetchRes => {
-                                return caches.open(CACHE_NAME).then(c => {
-                                    if(e.request.url.startsWith('http')) c.put(e.request, fetchRes.clone());
-                                    return fetchRes;
-                                });
-                            });
-                        }).catch(() => caches.match(location.href))
-                    );
-                });
-            `;
+            const swCode = `const CACHE_NAME='stellantis-pwa-v1';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll([location.href])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(res=>res||fetch(e.request).then(fRes=>caches.open(CACHE_NAME).then(c=>{if(e.request.url.startsWith('http'))c.put(e.request,fRes.clone());return fRes;}))).catch(()=>caches.match(location.href)));});`;
             const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl)
-                .then(reg => console.log('✅ Service Worker registrado'))
-                .catch(err => console.error('❌ Error SW:', err));
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.error('Error SW:', err));
         });
     }
 
     async function init() {
         let hayDatosLocales = false;
-        
         if(localStorage.getItem(K_DATA)) { datosGuardados = JSON.parse(localStorage.getItem(K_DATA)); hayDatosLocales = true; }
         if(localStorage.getItem(K_EXTR)) horasExtra = JSON.parse(localStorage.getItem(K_EXTR));
         if(localStorage.getItem(K_PATRON)) patronPlano = JSON.parse(localStorage.getItem(K_PATRON));
@@ -485,34 +436,22 @@
         let savedConf = localStorage.getItem(K_CONF);
         if (savedConf) {
             let parsed = JSON.parse(savedConf);
-            if (parsed.salario !== undefined) {
-                let curY = new Date().getFullYear();
-                configAnual[curY] = parsed;
-            } else {
-                configAnual = parsed;
-            }
+            if (parsed.salario !== undefined) { configAnual[new Date().getFullYear()] = parsed; } 
+            else { configAnual = parsed; }
         } else {
-            configAnual[new Date().getFullYear()] = Object.assign({}, defaultConf);
+            configAnual[new Date().getFullYear()] = JSON.parse(JSON.stringify(defaultConf));
         }
         
         try {
             const res = await fetch(CLOUD_URL + '?t=' + Date.now());
             if(res.ok) {
                 const cloudData = await res.json();
-                if (hayDatosLocales) {
-                    if (confirm("☁️ Hay una copia en la nube disponible.\n¿Deseas sobrescribir tus datos locales con los de GitHub?")) {
-                        aplicarNuevosDatos(cloudData);
-                    }
-                } else {
-                    aplicarNuevosDatos(cloudData);
-                }
+                if (!hayDatosLocales || confirm("☁️ Hay una copia en la nube disponible.\n¿Deseas sobrescribir tus datos locales con los de GitHub?")) { aplicarNuevosDatos(cloudData); }
             }
-        } catch (e) { console.log("Usando datos locales o sin conexión."); }
+        } catch (e) {}
 
         let savedStart = localStorage.getItem(K_START);
-        if(!savedStart) savedStart = "2026-01-01";
-        document.getElementById('cycleStartDate').value = savedStart;
-
+        document.getElementById('cycleStartDate').value = savedStart || "2026-01-01";
         actualizarUIBloqueo();
         renderCalendario();
     }
@@ -520,26 +459,24 @@
     function getConf(y) {
         if (configAnual[y]) return configAnual[y];
         let years = Object.keys(configAnual).map(Number).sort((a,b)=>b-a);
-        if (years.length === 0) return Object.assign({}, defaultConf);
+        if (years.length === 0) return JSON.parse(JSON.stringify(defaultConf));
         let closest = years.find(yr => yr <= y) || years[years.length-1];
         return configAnual[closest];
     }
+    
+    function getMesParams(y, m) {
+        let conf = getConf(y);
+        if (!conf.mesesParams) conf.mesesParams = {};
+        if (conf.mesesParams[m]) return conf.mesesParams[m];
+        return { irpf: conf.deduccion || 0, prima: 0, cobrarExtras: false };
+    }
 
     function aplicarNuevosDatos(p) {
-        if(p.data) datosGuardados = p.data; else if(p.d) datosGuardados = p.d;
-        if(p.extras) horasExtra = p.extras; else if(p.e) horasExtra = p.e; 
+        if(p.data||p.d) datosGuardados = p.data||p.d;
+        if(p.extras||p.e) horasExtra = p.extras||p.e; 
         if(p.patron) patronPlano = p.patron;
-        
-        if(p.configAnual) {
-            configAnual = p.configAnual;
-        } else if(p.config) {
-            if(p.config.salario !== undefined) {
-                configAnual[new Date().getFullYear()] = p.config;
-            } else {
-                configAnual = p.config;
-            }
-        }
-
+        if(p.configAnual) configAnual = p.configAnual;
+        else if(p.config) { if(p.config.salario !== undefined) configAnual[new Date().getFullYear()] = p.config; else configAnual = p.config; }
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
         localStorage.setItem(K_CONF, JSON.stringify(configAnual));
         localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
@@ -547,73 +484,35 @@
         if(p.start) localStorage.setItem(K_START, p.start);
     }
 
-    function parseSafeDate(str) { const p = str.split('-'); return new Date(p[0], p[1]-1, p[2], 12,0,0); }
-    function getMondayOfDate(d) {
-        const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const m = new Date(d); m.setDate(diff); return m;
-    }
-    function getDaysDiff(d1, d2) {
-        const date1 = new Date(d1); date1.setHours(12,0,0,0);
-        const date2 = new Date(d2); date2.setHours(12,0,0,0);
-        return Math.round((date2 - date1) / (1000*60*60*24));
-    }
-
-    function toggleLock() {
-        editMode = (editMode + 1) % 3;
-        actualizarUIBloqueo();
-    }
-    
-    function activarModoExtras() {
-        editMode = 2;
-        actualizarUIBloqueo();
-    }
+    function toggleLock() { editMode = (editMode + 1) % 3; actualizarUIBloqueo(); }
+    function activarModoExtras() { editMode = 2; actualizarUIBloqueo(); }
 
     function actualizarUIBloqueo() {
         const btn = document.getElementById('btnLock');
-        if (editMode === 0) {
-            btn.innerHTML = '🔒';
-            btn.style.backgroundColor = '#d32f2f'; // Rojo
-            btn.title = "Bloqueado (Pulsa para editar Turnos)";
-        } else if (editMode === 1) {
-            btn.innerHTML = '<span style="display:inline-block; transform: scaleX(-1);">🔓</span>';
-            btn.style.backgroundColor = '#00e676'; // Verde
-            btn.title = "Modo Turnos (Pulsa para Extras)";
-        } else {
-            btn.innerHTML = '⏱️';
-            btn.style.backgroundColor = '#ff9100'; // Naranja
-            btn.title = "Modo Extras (Pulsa para Bloquear)";
-        }
+        if (editMode === 0) { btn.innerHTML = '🔒'; btn.style.backgroundColor = '#d32f2f'; btn.title = "Bloqueado"; } 
+        else if (editMode === 1) { btn.innerHTML = '<span style="display:inline-block; transform: scaleX(-1);">🔓</span>'; btn.style.backgroundColor = '#00e676'; btn.title = "Modo Turnos"; } 
+        else { btn.innerHTML = '⏱️'; btn.style.backgroundColor = '#ff9100'; btn.title = "Modo Extras"; }
         renderCalendario(); 
     }
+
+    function parseSafeDate(str) { const p = str.split('-'); return new Date(p[0], p[1]-1, p[2], 12,0,0); }
+    function getMondayOfDate(d) { const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1); const m = new Date(d); m.setDate(diff); return m; }
+    function getDaysDiff(d1, d2) { return Math.round((new Date(d2).setHours(12,0,0,0) - new Date(d1).setHours(12,0,0,0)) / 86400000); }
 
     function renderEditorGrid() {
         const startStr = document.getElementById('cycleStartDate').value;
         if(!startStr) return;
         localStorage.setItem(K_START, startStr);
         const refMonday = getMondayOfDate(parseSafeDate(startStr));
-        const grid = document.getElementById('patternGrid');
-        if(!grid) return;
         let html = '<div class="p-head">L</div><div class="p-head">M</div><div class="p-head">X</div><div class="p-head">J</div><div class="p-head">V</div><div class="p-head">S</div><div class="p-head">D</div>';
         for(let i=0; i<42; i++) {
             const cd = new Date(refMonday); cd.setDate(refMonday.getDate() + i);
-            let bg = patronPlano[i]===1 ? "var(--color-descanso)" : "var(--color-noche)";
-            let col = "#ffffff"; 
-            let mesStr = cd.toLocaleDateString('es-ES',{month:'short'}).toUpperCase();
-            let diaStr = cd.getDate();
-            
-            html += `<div class="p-cell" style="background:${bg}; color:${col};" onclick="togglePatronIndex(${i})">
-                        <span style="font-size:0.55em; font-weight:normal; line-height:1; color:#aaa; margin-bottom:2px;">${mesStr}</span>
-                        <span style="line-height:1;">${diaStr}</span>
-                     </div>`;
+            html += `<div class="p-cell" style="background:${patronPlano[i]===1 ? "var(--color-descanso)" : "var(--color-noche)"}; color:#fff;" onclick="togglePatronIndex(${i})"><span style="font-size:0.55em; color:#aaa; margin-bottom:2px;">${cd.toLocaleDateString('es-ES',{month:'short'}).toUpperCase()}</span><span>${cd.getDate()}</span></div>`;
         }
-        grid.innerHTML = html;
+        document.getElementById('patternGrid').innerHTML = html;
     }
 
-    function togglePatronIndex(i) {
-        patronPlano[i] = patronPlano[i] === 1 ? 0 : 1;
-        localStorage.setItem(K_PATRON, JSON.stringify(patronPlano));
-        renderEditorGrid();
-    }
+    function togglePatronIndex(i) { patronPlano[i] = patronPlano[i] === 1 ? 0 : 1; localStorage.setItem(K_PATRON, JSON.stringify(patronPlano)); renderEditorGrid(); }
 
     function aplicarPatron() {
         const year = parseInt(document.getElementById('applyYear').value);
@@ -621,16 +520,10 @@
         if(!year || !startStr) return;
         const refMonday = getMondayOfDate(parseSafeDate(startStr));
         for (let key in datosGuardados) { if(key.startsWith(year + "-")) delete datosGuardados[key]; }
-        
-        const d = new Date(year, 0, 1, 12, 0, 0);
-        const end = new Date(year, 11, 31, 12, 0, 0);
+        const d = new Date(year, 0, 1, 12, 0, 0); const end = new Date(year, 11, 31, 12, 0, 0);
         while (d <= end) {
-            const diff = getDaysDiff(refMonday, d);
-            let pIdx = diff % 42; if (pIdx < 0) pIdx += 42;
-            if (patronPlano[pIdx] !== 1) { 
-                let w = d.getDay();
-                datosGuardados[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] = (w===0||w===6) ? 2 : 1;
-            }
+            let pIdx = getDaysDiff(refMonday, d) % 42; if (pIdx < 0) pIdx += 42;
+            if (patronPlano[pIdx] !== 1) { let w = d.getDay(); datosGuardados[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] = (w===0||w===6) ? 2 : 1; }
             d.setDate(d.getDate() + 1);
         }
         localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
@@ -639,96 +532,44 @@
 
     function resetearCalendario() {
         const y = document.getElementById('applyYear').value;
-        if(confirm(`¿Borrar datos de ${y}?`)) {
-            for (let key in datosGuardados) { if(key.startsWith(y + "-")) delete datosGuardados[key]; }
-            localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
-            renderCalendario();
-        }
+        if(confirm(`¿Borrar datos de ${y}?`)) { for (let key in datosGuardados) { if(key.startsWith(y + "-")) delete datosGuardados[key]; } localStorage.setItem(K_DATA, JSON.stringify(datosGuardados)); renderCalendario(); }
     }
 
     function renderCalendario() {
         const y = fechaActual.getFullYear(), m = fechaActual.getMonth();
         const hoy = new Date();
-        let tit = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase();
-        document.getElementById('mesTitulo').innerText = tit.replace(' DE ', ' ');
+        document.getElementById('mesTitulo').innerText = fechaActual.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).toUpperCase().replace(' DE ', ' ');
         
-        const primerDia = new Date(y, m, 1).getDay();
-        const esp = (primerDia === 0 ? 6 : primerDia - 1);
+        const primerDia = new Date(y, m, 1).getDay(); const esp = (primerDia === 0 ? 6 : primerDia - 1);
         const totalDias = new Date(y, m + 1, 0).getDate();
-        
         const diasRender = [];
-        for (let i = esp - 1; i >= 0; i--) {
-            diasRender.push({ fecha: new Date(y, m, -i), tenue: true });
-        }
-        for (let d = 1; d <= totalDias; d++) {
-            diasRender.push({ fecha: new Date(y, m, d), tenue: false });
-        }
-        const celdasTotales = esp + totalDias;
-        const huecosPost = celdasTotales % 7 === 0 ? 0 : 7 - (celdasTotales % 7);
-        for (let d = 1; d <= huecosPost; d++) {
-            diasRender.push({ fecha: new Date(y, m + 1, d), tenue: true });
-        }
+        for (let i = esp - 1; i >= 0; i--) diasRender.push({ fecha: new Date(y, m, -i), tenue: true });
+        for (let d = 1; d <= totalDias; d++) diasRender.push({ fecha: new Date(y, m, d), tenue: false });
+        const celdasTotales = esp + totalDias; const huecosPost = celdasTotales % 7 === 0 ? 0 : 7 - (celdasTotales % 7);
+        for (let d = 1; d <= huecosPost; d++) diasRender.push({ fecha: new Date(y, m + 1, d), tenue: true });
         
-        const c = document.getElementById('diasContainer'); c.innerHTML = '';
-        
-        let cT=0, cN=0, cF=0;
+        let cT=0, cN=0, cF=0; let html = '';
         
         diasRender.forEach(item => {
-            const fy = item.fecha.getFullYear();
-            const fm = item.fecha.getMonth();
-            const fd = item.fecha.getDate();
+            const fy = item.fecha.getFullYear(), fm = item.fecha.getMonth(), fd = item.fecha.getDate();
             const k = `${fy}-${String(fm+1).padStart(2,'0')}-${String(fd).padStart(2,'0')}`;
             const est = datosGuardados[k] || 0;
             let cls='', txt='LIBRE';
             
             if (!item.tenue) {
-                if(est===1) { cN++; cT++; }
-                else if(est===2) { cN++; cF++; cT++; }
-                else if(est===6) { cT++; }
+                if(est===1) { cN++; cT++; } else if(est===2) { cN++; cF++; cT++; } else if(est===6) { cT++; }
             }
+            if(est===1){cls='noche';txt='NOCHE';}else if(est===2){cls='festivo';txt='FESTIVO';}else if(est===3){cls='vacaciones';txt='VACAS';}else if(est===4){cls='convenio';txt='CONV';}else if(est===5){cls='adecuacion';txt='ADEC';}else if(est===6){cls='dia';txt='DÍA';}
             
-            if(est===1) { cls='noche'; txt='NOCHE'; }
-            else if(est===2) { cls='festivo'; txt='FESTIVO'; }
-            else if(est===3) { cls='vacaciones'; txt='VACAS'; }
-            else if(est===4) { cls='convenio'; txt='CONV'; }
-            else if(est===5) { cls='adecuacion'; txt='ADEC'; }
-            else if(est===6) { cls='dia'; txt='DÍA'; }
-            
-            const div = document.createElement('div');
-            div.className = `day-cell ${cls}`;
-            if (item.tenue) div.style.opacity = '0.35'; 
-            div.style.cursor = editMode === 0 ? 'default' : 'pointer'; 
-            
-            if(fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) div.classList.add('today');
-            if(horasExtra[k]) div.innerHTML += `<div class="badge-extra">+${horasExtra[k]}h</div>`;
-            div.innerHTML += `<div class="day-num">${fd}</div><div class="day-label">${txt}</div>`;
-            
-            div.onclick = () => {
-                if (editMode === 0) {
-                    const btn = document.getElementById('btnLock');
-                    btn.style.transform = 'scale(1.2)';
-                    setTimeout(() => btn.style.transform = 'scale(1)', 150);
-                    return;
-                }
-                if (editMode === 1) {
-                    toggleDia(k);
-                } else if (editMode === 2) {
-                    let prev = horasExtra[k] || "";
-                    let val = prompt(`⏱️ HORAS EXTRA (${fd}/${fm+1}/${fy})\nEscribe las horas (ej: 2.5 o -1). Deja vacío para borrar:`, prev);
-                    if (val !== null) {
-                        let parsed = parseFloat(val.replace(',', '.'));
-                        if (isNaN(parsed) || parsed === 0) {
-                            delete horasExtra[k];
-                        } else {
-                            horasExtra[k] = parsed;
-                        }
-                        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
-                        renderCalendario();
-                    }
-                }
-            };
-            c.appendChild(div);
+            let extraStr = horasExtra[k] ? `<div class="badge-extra">+${horasExtra[k]}h</div>` : '';
+            let isToday = (fy === hoy.getFullYear() && fm === hoy.getMonth() && fd === hoy.getDate()) ? 'today' : '';
+            let opacity = item.tenue ? 'style="opacity:0.35;"' : '';
+            let cursor = editMode === 0 ? 'cursor:default;' : 'cursor:pointer;';
+
+            html += `<div class="day-cell ${cls} ${isToday}" ${opacity} style="${cursor}" onclick="interactuarDia('${k}', ${fd}, ${fm}, ${fy})">${extraStr}<div class="day-num">${fd}</div><div class="day-label">${txt}</div></div>`;
         });
+        
+        document.getElementById('diasContainer').innerHTML = html;
         
         let conf = getConf(y);
         document.getElementById('resTrabajados').innerText = cT;
@@ -741,110 +582,109 @@
         calcularGlobales(y, conf);
     }
 
-    function toggleDia(k) {
-        datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 7;
-        if(datosGuardados[k] === 0) delete datosGuardados[k];
-        localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+    function interactuarDia(k, fd, fm, fy) {
+        if (editMode === 0) {
+            const btn = document.getElementById('btnLock'); btn.style.transform = 'scale(1.2)'; setTimeout(() => btn.style.transform = 'scale(1)', 150); return;
+        }
+        if (editMode === 1) {
+            datosGuardados[k] = ((datosGuardados[k] || 0) + 1) % 7;
+            if(datosGuardados[k] === 0) delete datosGuardados[k];
+            localStorage.setItem(K_DATA, JSON.stringify(datosGuardados));
+            renderCalendario();
+        } else if (editMode === 2) {
+            fechaExtraActiva = k;
+            document.getElementById('extraFechaTitulo').innerText = `${fd} / ${fm+1} / ${fy}`;
+            document.getElementById('extraClickValor').value = horasExtra[k] || "";
+            document.getElementById('modalExtraClick').style.display = 'flex';
+        }
+    }
+    
+    function guardarExtraClick() {
+        let val = parseFloat(document.getElementById('extraClickValor').value.replace(',', '.'));
+        if (isNaN(val) || val === 0) delete horasExtra[fechaExtraActiva];
+        else horasExtra[fechaExtraActiva] = val;
+        localStorage.setItem(K_EXTR, JSON.stringify(horasExtra));
+        document.getElementById('modalExtraClick').style.display = 'none';
         renderCalendario();
     }
 
-    function calcularGlobales(year, conf) {
-        let diasT=0, nochesAnuales=0, festivosAnuales=0;
-        let cVacAnual=0, cConvAnual=0, cAdecAnual=0;
-        let hExtraAnual = conf.extraBase || 0;
+    // MOTOR ITERATIVO MENSUAL (Corrige el fallo del IRPF Anual)
+    function simularMes(y, m, conf) {
+        let params = getMesParams(y, m);
+        let cN=0, cF=0, hEx=0;
+        const dInM = new Date(y, m, 0).getDate();
+        for(let d=1; d<=dInM; d++) {
+            let k = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let v = datosGuardados[k] || 0;
+            if(v===1) cN++; if(v===2) { cN++; cF++; }
+            if(horasExtra[k]) hEx += horasExtra[k];
+        }
+        let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
+        let base = conf.salario; let impN = hNoche * conf.noche; let impG = hGarantia * conf.garantia; let impF = hFestivo * conf.festivo;
+        let impPE = (m===6||m===12) ? conf.pagaExtra : 0;
+        let impO = conf.otros;
+        let impEx = params.cobrarExtras ? (hEx * (conf.precioExtra || 20)) : 0;
+        let impPr = params.prima;
+        let bruto = base + impN + impG + impF + impPE + impO + impEx + impPr;
+        let deduccion = bruto * params.irpf;
+        let neto = bruto - deduccion;
+        return { bruto, neto };
+    }
 
+    function calcularGlobales(year, conf) {
+        let diasT=0, cVacAnual=0, cConvAnual=0, cAdecAnual=0; let hExtraAnual = conf.extraBase || 0;
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
-                if(est===1 || est===2 || est===6) { diasT++; }
-                if(est===1 || est===2) { nochesAnuales++; }
-                if(est===2) festivosAnuales++;
-                if(est===3) cVacAnual++;
-                if(est===4) cConvAnual++;
-                if(est===5) cAdecAnual++;
+                if(est===1 || est===2 || est===6) diasT++;
+                if(est===3) cVacAnual++; if(est===4) cConvAnual++; if(est===5) cAdecAnual++;
             }
         }
-        for(const [k,val] of Object.entries(horasExtra)) {
-            if(k.startsWith(year)) hExtraAnual += val;
-        }
+        for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += val; }
         
         document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hExtraAnual).toFixed(1) + "h";
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
         document.getElementById('statVacaciones').innerText = cVacAnual;
         document.getElementById('statConvenio').innerText = cConvAnual;
-        
         document.getElementById('statAdecuacion').innerText = cAdecAnual;
-        const totalAdec = conf.adecTotal || 8;
-        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${totalAdec})`;
+        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${conf.adecTotal || 8})`;
 
-        let brutoAnual = (conf.salario * 12) + (conf.pagaExtra * 2);
-        brutoAnual += (nochesAnuales * 7.75 * conf.noche);
-        brutoAnual += (nochesAnuales * 3.875 * conf.garantia);
-        brutoAnual += (festivosAnuales * 7.75 * conf.festivo);
-        
-        let mesesCobro = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
-        brutoAnual += ((conf.otros || 0) * mesesCobro); 
-        
-        let netoAnual = brutoAnual * (1 - conf.deduccion);
+        // Iteración Anual Exacta
+        let sumBruto = 0, sumNeto = 0;
+        for (let m=1; m<=12; m++) {
+            let res = simularMes(year, m, conf);
+            sumBruto += res.bruto; sumNeto += res.neto;
+        }
 
-        document.getElementById('statTotalEurosConfig').innerText = fmtM(brutoAnual) + " €";
-        document.getElementById('statTotalNetoAnual').innerText = fmtM(netoAnual) + " € (Neto Estimado)";
+        document.getElementById('statTotalEurosConfig').innerText = fmtM(sumBruto) + " €";
+        document.getElementById('statTotalNetoAnual').innerText = fmtM(sumNeto) + " € (Neto Estimado)";
     }
-
-    function fmtN(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
-    function fmtM(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
 
     function renderNominaDetallada() {
         const selVal = document.getElementById('nominaMonthSelector').value; 
         if(!selVal) return;
         const [yearStr, monthStr] = selVal.split('-');
-        const year = parseInt(yearStr);
-        const month = parseInt(monthStr);
-        const conf = getConf(year);
+        const year = parseInt(yearStr), month = parseInt(monthStr);
+        const conf = getConf(year); const params = getMesParams(year, month);
 
-        // Mostrar mes en header para PDF
-        const mesesNombres = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
-        document.getElementById('printMesLbl').innerText = `- ${mesesNombres[month-1]} ${year}`;
+        document.getElementById('printMesLbl').innerText = `- ${["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"][month-1]} ${year}`;
 
-        // IRPF Dinámico del mes
-        let dedInput = document.getElementById('overrideDeduccion');
-        if (dedInput.value === "") dedInput.value = conf.deduccion || 0;
-        let dedMes = parseFloat(dedInput.value);
-
-        let cN = 0, cF = 0, hExtraMes = 0;
-        const daysInMonth = new Date(year, month, 0).getDate();
-        
+        let cN = 0, cF = 0, hExtraMes = 0; const daysInMonth = new Date(year, month, 0).getDate();
         for(let d=1; d<=daysInMonth; d++) {
             let k = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            let v = datosGuardados[k] || 0;
-            if(v===1) cN++; 
-            if(v===2) { cN++; cF++; }
+            let v = datosGuardados[k] || 0; if(v===1) cN++; if(v===2) { cN++; cF++; }
             if(horasExtra[k]) hExtraMes += horasExtra[k];
         }
 
-        let hNoche = cN * 7.75;
-        let hGarantia = hNoche / 2;
-        let hFestivo = cF * 7.75;
-
-        let impBase = conf.salario;
-        let impNoche = hNoche * conf.noche;
-        let impGarantia = hGarantia * conf.garantia;
-        let impFestivo = hFestivo * conf.festivo;
-        let impOtros = conf.otros || 0;
+        let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
+        let impBase = conf.salario; let impNoche = hNoche * conf.noche; let impGarantia = hGarantia * conf.garantia; let impFestivo = hFestivo * conf.festivo;
+        let impOtros = conf.otros || 0; let impPagaExtra = (month === 6 || month === 12) ? conf.pagaExtra : 0;
         
-        let impPagaExtra = 0;
-        let rowPagaExtra = "";
-        if (month === 6 || month === 12) {
-            impPagaExtra = conf.pagaExtra;
-            let label = month === 6 ? "Paga Extra Junio" : "Paga Extra Navidad";
-            rowPagaExtra = `<tr><td>${label}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>`;
-        }
-
-        // Extras Financieras
-        let impExtras = 0;
-        let rowExtras = "";
-        let cobrarExtras = document.getElementById('cobrarExtrasCb').checked;
+        let rowPagaExtra = impPagaExtra > 0 ? `<tr><td>Paga Extra ${month===6?'Junio':'Navidad'}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>` : "";
+        let rowOtros = impOtros > 0 ? `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>` : "";
+        
+        let impExtras = 0; let rowExtras = "";
         if(hExtraMes !== 0) {
-            if (cobrarExtras) {
+            if (params.cobrarExtras) {
                 impExtras = hExtraMes * (conf.precioExtra || 20);
                 rowExtras = `<tr><td>Horas Extra (Cobradas)</td><td>${hExtraMes.toFixed(2)}</td><td>${fmtM(conf.precioExtra || 20)} €</td><td>${fmtM(impExtras)} €</td></tr>`;
             } else {
@@ -852,20 +692,11 @@
             }
         }
         
-        let rowOtros = "";
-        if (impOtros > 0) {
-            rowOtros = `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>`;
-        }
-
-        // Primas / Atrasos
-        let valPrima = parseFloat(document.getElementById('primaMes').value) || 0;
-        let rowPrima = "";
-        if (valPrima !== 0) {
-            rowPrima = `<tr><td>Prima / Conceptos Atípicos</td><td>1.00</td><td>-</td><td>${fmtM(valPrima)} €</td></tr>`;
-        }
+        let valPrima = params.prima || 0;
+        let rowPrima = valPrima !== 0 ? `<tr><td>Prima / Conceptos Atípicos</td><td>1.00</td><td>-</td><td>${fmtM(valPrima)} €</td></tr>` : "";
 
         let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros + impExtras + valPrima;
-        let totalDeduccion = totalBruto * dedMes;
+        let totalDeduccion = totalBruto * params.irpf;
         let liquido = totalBruto - totalDeduccion;
 
         let html = `
@@ -886,134 +717,85 @@
     }
 
     function initMonthSelector() {
-        const sel = document.getElementById('nominaMonthSelector');
-        sel.innerHTML = "";
+        const sel = document.getElementById('nominaMonthSelector'); sel.innerHTML = "";
         const meses = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+        let y = document.getElementById('globalConfYear').value || fechaActual.getFullYear();
         for(let i=0; i<12; i++) {
-            let opt = document.createElement('option');
-            opt.value = `${fechaActual.getFullYear()}-${String(i+1).padStart(2,'0')}`;
-            opt.text = meses[i] + " " + fechaActual.getFullYear();
-            sel.appendChild(opt);
+            let opt = document.createElement('option'); opt.value = `${y}-${String(i+1).padStart(2,'0')}`; opt.text = meses[i] + " " + y; sel.appendChild(opt);
         }
-        sel.value = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
+        sel.value = `${y}-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
     }
 
     function abrirConfig() { 
         document.getElementById('configModal').style.display='flex'; 
         document.getElementById('globalConfYear').value = fechaActual.getFullYear();
         document.getElementById('applyYear').value = fechaActual.getFullYear();
-        
-        cargarConfigUI();
-        initMonthSelector(); 
-        
-        // Resetear overrides visuales de nómina al abrir
-        document.getElementById('overrideDeduccion').value = "";
-        document.getElementById('primaMes').value = "";
-        document.getElementById('cobrarExtrasCb').checked = false;
-
-        renderNominaDetallada(); 
-        renderEditorGrid(); 
+        initMonthSelector(); cargarConfigUI(); renderEditorGrid(); 
     }
     
     function cargarConfigUI() {
-        let y = document.getElementById('globalConfYear').value;
-        let conf = getConf(y);
+        let y = document.getElementById('globalConfYear').value; let conf = getConf(y);
         
-        document.getElementById('confSalario').value = conf.salario || 0;
-        document.getElementById('confPagaExtra').value = conf.pagaExtra || 0;
-        document.getElementById('confNoche').value = conf.noche || 0;
-        document.getElementById('confGarantia').value = conf.garantia || 0;
-        document.getElementById('confFestivo').value = conf.festivo || 0;
-        document.getElementById('confPrecioExtra').value = conf.precioExtra || 20;
-        document.getElementById('confOtros').value = conf.otros || 0;
-        document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
-        document.getElementById('confDeduccion').value = conf.deduccion || 0;
-        document.getElementById('confBolsa').value = conf.bolsa || 0;
-        document.getElementById('confExtraBase').value = conf.extraBase || 0;
-        document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
+        document.getElementById('confSalario').value = conf.salario || 0; document.getElementById('confPagaExtra').value = conf.pagaExtra || 0;
+        document.getElementById('confNoche').value = conf.noche || 0; document.getElementById('confGarantia').value = conf.garantia || 0;
+        document.getElementById('confFestivo').value = conf.festivo || 0; document.getElementById('confPrecioExtra').value = conf.precioExtra || 20;
+        document.getElementById('confOtros').value = conf.otros || 0; document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
+        document.getElementById('confDeduccion').value = conf.deduccion || 0; document.getElementById('confBolsa').value = conf.bolsa || 0;
+        document.getElementById('confExtraBase').value = conf.extraBase || 0; document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
         
-        // Al cambiar de año en la UI, reseteamos el override de IRPF para que lea el del nuevo año
-        document.getElementById('overrideDeduccion').value = conf.deduccion || 0;
-        
+        let selVal = document.getElementById('nominaMonthSelector').value;
+        if(selVal && selVal.startsWith(y)) {
+            let m = parseInt(selVal.split('-')[1]); let params = getMesParams(y, m);
+            document.getElementById('overrideDeduccion').value = params.irpf;
+            document.getElementById('primaMes').value = params.prima || "";
+            document.getElementById('cobrarExtrasCb').checked = params.cobrarExtras;
+        } else {
+            initMonthSelector();
+        }
         renderNominaDetallada();
     }
 
-    function cerrarConfig() { document.getElementById('configModal').style.display='none'; }
-    
-    function guardarConfig() {
-        let y = document.getElementById('globalConfYear').value;
-        if (!configAnual[y]) {
-            configAnual[y] = Object.assign({}, getConf(y)); 
-        }
-        let conf = configAnual[y];
+    function guardarDatosMes() {
+        let selVal = document.getElementById('nominaMonthSelector').value; if(!selVal) return;
+        const [yearStr, monthStr] = selVal.split('-'); const y = parseInt(yearStr), m = parseInt(monthStr);
+        if (!configAnual[y]) configAnual[y] = Object.assign({}, getConf(y));
+        if (!configAnual[y].mesesParams) configAnual[y].mesesParams = {};
         
-        conf.salario = parseFloat(document.getElementById('confSalario').value) || 0;
-        conf.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value) || 0;
-        conf.noche = parseFloat(document.getElementById('confNoche').value) || 0;
-        conf.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
-        conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0;
-        conf.precioExtra = parseFloat(document.getElementById('confPrecioExtra').value) || 0;
-        conf.otros = parseFloat(document.getElementById('confOtros').value) || 0;
-        conf.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
-        conf.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0;
-        conf.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
-        conf.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0;
-        conf.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
-        
+        configAnual[y].mesesParams[m] = {
+            irpf: parseFloat(document.getElementById('overrideDeduccion').value) || 0,
+            prima: parseFloat(document.getElementById('primaMes').value) || 0,
+            cobrarExtras: document.getElementById('cobrarExtrasCb').checked
+        };
         localStorage.setItem(K_CONF, JSON.stringify(configAnual));
-        renderCalendario(); 
-        alert(`Datos del año ${y} guardados.`);
+        renderNominaDetallada(); calcularGlobales(fechaActual.getFullYear(), getConf(fechaActual.getFullYear()));
     }
 
-    function switchTab(id) {
-        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-        document.getElementById(id).classList.add('active');
-        if(id==='tab-nomina') renderNominaDetallada();
-        if(id==='tab-turnos') renderEditorGrid();
+    function guardarConfigAnual() {
+        let y = document.getElementById('globalConfYear').value;
+        if (!configAnual[y]) configAnual[y] = Object.assign({}, getConf(y));
+        let conf = configAnual[y];
+        conf.salario = parseFloat(document.getElementById('confSalario').value) || 0; conf.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value) || 0;
+        conf.noche = parseFloat(document.getElementById('confNoche').value) || 0; conf.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
+        conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0; conf.precioExtra = parseFloat(document.getElementById('confPrecioExtra').value) || 0;
+        conf.otros = parseFloat(document.getElementById('confOtros').value) || 0; conf.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
+        conf.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0; conf.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
+        conf.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0; conf.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
+        localStorage.setItem(K_CONF, JSON.stringify(configAnual)); renderCalendario(); alert(`Datos base del año ${y} guardados.`);
     }
 
-    function editarBolsaRapida() {
-        let curY = fechaActual.getFullYear();
-        let conf = getConf(curY);
-        let num = prompt(`Introduce el saldo oficial de BOLSA DE HORAS para ${curY}:`, conf.bolsa || 0);
-        if (num !== null) {
-            let parsed = parseFloat(num.replace(',', '.'));
-            if (!isNaN(parsed)) {
-                if(!configAnual[curY]) configAnual[curY] = Object.assign({}, conf);
-                configAnual[curY].bolsa = parsed;
-                localStorage.setItem(K_CONF, JSON.stringify(configAnual));
-                renderCalendario();
-            }
-        }
-    }
-
-    function alertaProteccionEstructural(tipo) {
-        alert(`⚠️ PROTECCIÓN DE DATOS\n\nNo puedes modificar el total de ${tipo} escribiendo un número arbitrario. Este es un "Total Calculado" derivado del calendario anual.\n\nPara añadir o quitar días, haz clic directamente sobre los días correspondientes en el calendario inferior.`);
-    }
+    function cerrarConfig() { document.getElementById('configModal').style.display='none'; renderCalendario(); }
+    function switchTab(id) { document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active')); document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active'); document.getElementById(id).classList.add('active'); if(id==='tab-nomina') renderNominaDetallada(); if(id==='tab-turnos') renderEditorGrid(); }
+    function editarBolsaRapida() { let curY = fechaActual.getFullYear(); let conf = getConf(curY); let num = prompt(`Introduce el saldo oficial de BOLSA DE HORAS para ${curY}:`, conf.bolsa || 0); if (num !== null) { let parsed = parseFloat(num.replace(',', '.')); if (!isNaN(parsed)) { if(!configAnual[curY]) configAnual[curY] = Object.assign({}, conf); configAnual[curY].bolsa = parsed; localStorage.setItem(K_CONF, JSON.stringify(configAnual)); renderCalendario(); } } }
+    function alertaProteccionEstructural(tipo) { alert(`⚠️ PROTECCIÓN DE DATOS\nNo puedes modificar el total de ${tipo} arbitrariamente. Modifícalo pulsando los días en el calendario inferior.`); }
 
     function descargarCopia() {
         const p = { data: datosGuardados, configAnual: configAnual, extras: horasExtra, patron: patronPlano, start: document.getElementById('cycleStartDate').value };
         const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p));
-        const a = document.createElement('a'); 
-        const dateStr = new Date().toISOString().split('T')[0];
-        a.download = `nomina_stellantis_backup_${dateStr}.json`;
-        a.href = s; 
-        a.click();
+        const a = document.createElement('a'); a.download = `nomina_stellantis_backup_${new Date().toISOString().split('T')[0]}.json`; a.href = s; a.click();
     }
     
     function cargarCopia(i) {
-        const r = new FileReader();
-        r.onload = e => {
-            try {
-                const p = JSON.parse(e.target.result);
-                aplicarNuevosDatos(p);
-                renderCalendario(); alert("Backup cargado exitosamente");
-            } catch(err) {
-                alert("Error leyendo archivo");
-            }
-        };
-        r.readAsText(i.files[0]);
+        const r = new FileReader(); r.onload = e => { try { aplicarNuevosDatos(JSON.parse(e.target.result)); renderCalendario(); alert("Backup cargado exitosamente"); } catch(err) { alert("Error leyendo archivo"); } }; r.readAsText(i.files[0]);
     }
 
     function cambiarMes(d) { fechaActual.setMonth(fechaActual.getMonth()+d); renderCalendario(); }
