@@ -372,7 +372,7 @@
                 <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V41 BLINDADA</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V42 FIXED EXTRAS</div>
             </div>
         </div>
     </div>
@@ -629,7 +629,6 @@
         }
         let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
         
-        // CÁLCULO BLINDADO (Evita NaN)
         let base = Number(conf.salario) || 0; 
         let impN = hNoche * (Number(conf.noche) || 0); 
         let impG = hGarantia * (Number(conf.garantia) || 0); 
@@ -655,7 +654,9 @@
         }
         for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += Number(val)||0; }
         
-        document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75 + hExtraAnual).toFixed(1) + "h";
+        // CORRECCIÓN V42: H. TRAB solo suma los turnos base (diasT * 7.75), ignorando las extras.
+        document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75).toFixed(1) + "h";
+        
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
         document.getElementById('statVacaciones').innerText = cVacAnual;
         document.getElementById('statConvenio').innerText = cConvAnual;
@@ -690,7 +691,6 @@
 
         let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
         
-        // RENDER BLINDADO
         let impBase = Number(conf.salario) || 0; 
         let impNoche = hNoche * (Number(conf.noche) || 0); 
         let impGarantia = hGarantia * (Number(conf.garantia) || 0); 
