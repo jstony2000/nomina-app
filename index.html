@@ -324,6 +324,7 @@
                 <div class="config-row">
                     <label>Meses de cobro (Otros):</label>
                     <input type="number" id="confMesesOtros" step="1" min="0" max="12">
+                    <span class="help-text">📅 Cuántos meses al año cobras los "Otros Complementos" (Por defecto: 12).</span>
                 </div>
                 <div class="config-row">
                     <label>% IRPF + SS (Base Anual):</label>
@@ -372,7 +373,7 @@
                 <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V42 FIXED EXTRAS</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V43 MES VENCIDO</div>
             </div>
         </div>
     </div>
@@ -402,12 +403,11 @@
     let patronPlano = new Array(42).fill(0);
     
     let configAnual = {}; 
-    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 11, precioExtra: 20.00, mesesParams: {} };
+    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 12, precioExtra: 20.00, mesesParams: {} };
     
     let editMode = 0; 
     let fechaExtraActiva = "";
 
-    // === FUNCIONES MATEMÁTICAS SEGURAS (ANTI-CRASH) ===
     function fmtN(n) { let v = Number(n); if(isNaN(v)) v = 0; return v.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
     function fmtM(n) { let v = Number(n); if(isNaN(v)) v = 0; return v.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}); }
 
@@ -654,7 +654,6 @@
         }
         for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += Number(val)||0; }
         
-        // CORRECCIÓN V42: H. TRAB solo suma los turnos base (diasT * 7.75), ignorando las extras.
         document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75).toFixed(1) + "h";
         
         document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
@@ -742,7 +741,11 @@
         for(let i=0; i<12; i++) {
             let opt = document.createElement('option'); opt.value = `${y}-${String(i+1).padStart(2,'0')}`; opt.text = meses[i] + " " + y; sel.appendChild(opt);
         }
-        sel.value = `${y}-${String(fechaActual.getMonth()+1).padStart(2,'0')}`;
+        
+        // V43: SELECCIONAR MES VENCIDO (Muestra el mes anterior al que estás viendo en el calendario principal)
+        let targetMonthIdx = fechaActual.getMonth(); // 0 a 11
+        let targetMonthStr = targetMonthIdx === 0 ? "01" : String(targetMonthIdx).padStart(2, '0');
+        sel.value = `${y}-${targetMonthStr}`;
     }
 
     function abrirConfig() { 
@@ -758,7 +761,7 @@
         document.getElementById('confSalario').value = conf.salario || 0; document.getElementById('confPagaExtra').value = conf.pagaExtra || 0;
         document.getElementById('confNoche').value = conf.noche || 0; document.getElementById('confGarantia').value = conf.garantia || 0;
         document.getElementById('confFestivo').value = conf.festivo || 0; document.getElementById('confPrecioExtra').value = conf.precioExtra || 20;
-        document.getElementById('confOtros').value = conf.otros || 0; document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 11;
+        document.getElementById('confOtros').value = conf.otros || 0; document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 12;
         document.getElementById('confDeduccion').value = conf.deduccion || 0; document.getElementById('confBolsa').value = conf.bolsa || 0;
         document.getElementById('confExtraBase').value = conf.extraBase || 0; document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
         
