@@ -182,8 +182,8 @@
                 <span class="stat-label" style="color:#aaa;">H. TRAB<span class="sub">(1720/AÑO)</span></span>
                 <span class="stat-val" id="statHorasTrabajadas">0h</span>
             </div>
-            <div class="stat-item stat-btn-extra" onclick="activarModoExtras()" title="Pulsar para añadir horas extra rápidamente">
-                <span class="stat-label" style="color:var(--color-extra)">EXTRAS ✎<span class="sub">&nbsp;</span></span>
+            <div class="stat-item stat-btn-extra" onclick="activarModoExtras()" title="Añadir Horas Estructurales o Extras">
+                <span class="stat-label" style="color:var(--color-extra)">H. ESTR/EXT ✎<span class="sub">&nbsp;</span></span>
                 <span class="stat-val" id="statHorasExtra">0h</span>
             </div>
             <div class="stat-item stat-btn-convenio" onclick="alertaProteccionEstructural('Convenio')" title="Total de días de convenio (calculado del calendario)">
@@ -260,9 +260,15 @@
                     </div>
                 </div>
                 
-                <div style="display:flex; align-items:center; margin-bottom:10px; background:#222; padding:8px; border-radius:4px; gap:10px;">
-                    <input type="checkbox" id="cobrarExtrasCb" onchange="guardarDatosMes()" style="transform:scale(1.5); margin-left:5px;">
-                    <label style="font-size:0.85rem; color:#fff; font-weight:bold;">Cobrar Horas Extra este mes (Si no, a Bolsa)</label>
+                <div style="margin-bottom:10px; background:#222; padding:8px; border-radius:4px;">
+                    <div style="display:flex; align-items:center; margin-bottom:8px; gap:10px;">
+                        <input type="checkbox" id="cobrarExtrasCb" onchange="guardarDatosMes()" style="transform:scale(1.5); margin-left:5px;">
+                        <label style="font-size:0.85rem; color:#fff; font-weight:bold;">Cobrar Horas Extra L-V (Si no, a Bolsa)</label>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="cobrarEstructuralesCb" onchange="guardarDatosMes()" style="transform:scale(1.5); margin-left:5px;">
+                        <label style="font-size:0.85rem; font-weight:bold; color:var(--color-extra);">Cobrar Estructurales Sáb/Dom (Si no, a Bolsa)</label>
+                    </div>
                 </div>
 
                 <div style="margin-bottom:15px; background:#222; padding:8px; border-radius:4px;">
@@ -278,7 +284,7 @@
                     </table>
                     <div class="nomina-footer">
                         <div class="nom-row-total"><span>TOTAL DEVENGADO</span><span id="nomBruto">0,00 €</span></div>
-                        <div class="nom-row-total" style="color:#d32f2f;"><span>DEDUCCIONES</span><span id="nomDeducciones">-0,00 €</span></div>
+                        <div class="nom-row-total" style="color:#d32f2f;"><span>DEDUCCIONES (SS+IRPF)</span><span id="nomDeducciones">-0,00 €</span></div>
                         <div class="nom-row-total" style="font-weight:900; font-size:1.1rem; margin-top:5px; border-top:1px dashed #000;"><span>LÍQUIDO</span><span id="nomNeto">0,00 €</span></div>
                     </div>
                 </div>
@@ -314,11 +320,15 @@
                     <input type="number" id="confFestivo" step="0.0001">
                 </div>
                 <div class="config-row">
-                    <label>Hora Extra (€):</label>
+                    <label>Hora Extra Ordinaria (L-V) (€):</label>
                     <input type="number" id="confPrecioExtra" step="0.01">
                 </div>
                 <div class="config-row">
-                    <label>Otros Complementos (K70, etc.):</label>
+                    <label>Hora Estructural (Sáb/Dom/Fest) (€):</label>
+                    <input type="number" id="confPrecioEstructural" step="0.01">
+                </div>
+                <div class="config-row">
+                    <label>Otros Complementos (K70, Transporte, etc.):</label>
                     <input type="number" id="confOtros" step="0.01">
                 </div>
                 <div class="config-row">
@@ -327,8 +337,9 @@
                     <span class="help-text">📅 Cuántos meses al año cobras los "Otros Complementos" (Por defecto: 12).</span>
                 </div>
                 <div class="config-row">
-                    <label>% IRPF + SS (Base Anual):</label>
+                    <label>% IRPF + SS (Ej: 0.2688):</label>
                     <input type="number" id="confDeduccion" step="0.0001">
+                    <span class="help-text">🧮 La suma total de los porcentajes de retención.</span>
                 </div>
                 <button class="btn-save" onclick="guardarConfigAnual()">GUARDAR DATOS DEL AÑO</button>
             </div>
@@ -361,7 +372,7 @@
                     <input type="number" id="confBolsa" step="0.1">
                 </div>
                 <div class="config-row">
-                    <label style="color:var(--color-extra);">HORAS EXTRA (Base arrastrada):</label>
+                    <label style="color:var(--color-extra);">HORAS ADICIONALES (Base arrastrada):</label>
                     <input type="number" id="confExtraBase" step="0.1">
                 </div>
                 <div class="config-row">
@@ -373,15 +384,16 @@
                 <button class="btn-save" onclick="descargarCopia()">💾 GUARDAR COPIA DE SEGURIDAD (.JSON)</button>
                 <button class="btn-file" onclick="document.getElementById('fileInput').click()">📂 CARGAR COPIA...</button>
                 <input type="file" id="fileInput" accept=".json" onchange="cargarCopia(this)" style="display:none;">
-                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V43 MES VENCIDO</div>
+                <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#aaa; font-weight:bold;">V48 LIMIT FIXED</div>
             </div>
         </div>
     </div>
 
     <div id="modalExtraClick" class="modal">
         <div class="modal-content" style="text-align:center; padding-top:25px; padding-bottom:25px;">
-            <h3 style="margin-top:0; color:var(--color-extra);">⏱️ ANOTAR HORAS EXTRA</h3>
-            <p id="extraFechaTitulo" style="color:#aaa; margin-bottom:20px; font-weight:bold;"></p>
+            <h3 style="margin-top:0; color:var(--color-extra);">⏱️ ANOTAR HORAS</h3>
+            <p id="extraFechaTitulo" style="color:#aaa; margin-bottom:10px; font-weight:bold;"></p>
+            <p class="help-text" style="border:none; text-align:center; padding:0; margin-bottom:20px; color:#ff9100;">* La App aplicará el precio de "Estructural" si es fin de semana y "Extra" si es L-V.</p>
             <input type="number" id="extraClickValor" step="0.1" placeholder="Ej: 2.5" style="font-size:2rem; text-align:center; margin-bottom:15px; height:60px;">
             <p class="help-text" style="border:none; text-align:center; padding:0; margin-bottom:20px;">Pon número positivo para sumar o negativo para restar. Deja vacío o en 0 para borrar.</p>
             <button class="btn-save" style="background:var(--color-extra); color:#000; font-size:1.1rem;" onclick="guardarExtraClick()">GUARDAR CAMBIOS</button>
@@ -403,7 +415,7 @@
     let patronPlano = new Array(42).fill(0);
     
     let configAnual = {}; 
-    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2709, bolsa: 131.38, extraBase: 0, otros: 16.96, adecTotal: 8, mesesOtros: 12, precioExtra: 20.00, mesesParams: {} };
+    const defaultConf = { salario: 2516.37, pagaExtra: 2516.37, noche: 3.1517, garantia: 2.2909, festivo: 7.9452, deduccion: 0.2688, bolsa: 131.38, extraBase: 0, otros: 18.17, adecTotal: 8, mesesOtros: 12, precioExtra: 20.66, precioEstructural: 25.83, mesesParams: {} };
     
     let editMode = 0; 
     let fechaExtraActiva = "";
@@ -416,7 +428,7 @@
     function instalarApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); } else { alert("Usa el menú del navegador: 'Añadir a pantalla principal'"); } }
 
     async function forzarActualizacion() {
-        if(confirm("¿Forzar actualización a la última versión de GitHub? Tus datos NO se perderán.\n\nIMPORTANTE: Si acabas de subir el archivo a GitHub, espera 3 minutos antes de darle a Aceptar o descargarás la versión vieja de nuevo.")) {
+        if(confirm("¿Forzar actualización a la última versión de GitHub? Tus datos NO se perderán.\\n\\nIMPORTANTE: Si acabas de subir el archivo a GitHub, espera 3 minutos antes de darle a Aceptar o descargarás la versión vieja de nuevo.")) {
             document.getElementById('btnForzarAct').innerText = "⏳ PURGANDO CACHÉ...";
             document.getElementById('btnForzarAct').style.background = "#d32f2f";
             try {
@@ -455,7 +467,7 @@
             const res = await fetch(CLOUD_URL + '?t=' + Date.now());
             if(res.ok) {
                 const cloudData = await res.json();
-                if (!hayDatosLocales || confirm("☁️ Hay una copia en la nube disponible.\n¿Deseas sobrescribir tus datos locales con los de GitHub?")) { aplicarNuevosDatos(cloudData); }
+                if (!hayDatosLocales || confirm("☁️ Hay una copia en la nube disponible.\\n¿Deseas sobrescribir tus datos locales con los de GitHub?")) { aplicarNuevosDatos(cloudData); }
             }
         } catch (e) {}
 
@@ -477,7 +489,7 @@
         let conf = getConf(y);
         if (!conf.mesesParams) conf.mesesParams = {};
         if (conf.mesesParams[m]) return conf.mesesParams[m];
-        return { irpf: Number(conf.deduccion) || 0, prima: 0, cobrarExtras: false };
+        return { irpf: Number(conf.deduccion) || 0, prima: 0, cobrarExtras: false, cobrarEstructurales: true };
     }
 
     function aplicarNuevosDatos(p) {
@@ -619,15 +631,20 @@
 
     function simularMes(y, m, conf) {
         let params = getMesParams(y, m);
-        let cN=0, cF=0, hEx=0;
+        let cN=0, cF=0, hExOrdinaria=0, hEstructural=0;
         const dInM = new Date(y, m, 0).getDate();
         for(let d=1; d<=dInM; d++) {
             let k = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             let v = datosGuardados[k] || 0;
             if(v===1) cN++; if(v===2) { cN++; cF++; }
-            if(horasExtra[k]) hEx += horasExtra[k];
+            
+            if(horasExtra[k]) {
+                let dObj = new Date(y, m-1, d); let w = dObj.getDay();
+                if(w === 0 || w === 6 || v === 2) hEstructural += Number(horasExtra[k]);
+                else hExOrdinaria += Number(horasExtra[k]);
+            }
         }
-        let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
+        let hNoche = cN * 7.75; let hGarantia = cN * 3.75; let hFestivo = cF * 7.75;
         
         let base = Number(conf.salario) || 0; 
         let impN = hNoche * (Number(conf.noche) || 0); 
@@ -635,39 +652,83 @@
         let impF = hFestivo * (Number(conf.festivo) || 0);
         let impPE = (m===6||m===12) ? (Number(conf.pagaExtra) || 0) : 0;
         let impO = Number(conf.otros) || 0;
-        let impEx = params.cobrarExtras ? (hEx * (Number(conf.precioExtra) || 20)) : 0;
+        
+        let impExOrd = params.cobrarExtras ? (hExOrdinaria * (Number(conf.precioExtra) || 0)) : 0;
+        let impEstruct = params.cobrarEstructurales ? (hEstructural * (Number(conf.precioEstructural) || 0)) : 0;
+        
         let impPr = Number(params.prima) || 0;
         
-        let bruto = base + impN + impG + impF + impPE + impO + impEx + impPr;
-        let deduccion = bruto * (Number(params.irpf) || 0);
-        let neto = bruto - deduccion;
+        let bruto = base + impN + impG + impF + impPE + impO + impExOrd + impEstruct + impPr;
+        
+        let prorrata = (Number(conf.pagaExtra) * 2) / 12;
+        let porcentajeSS = 0.065; 
+        let porcentajeIRPF = (Number(params.irpf) || 0) - porcentajeSS;
+        if (porcentajeIRPF < 0) porcentajeIRPF = 0;
+        
+        let deduccionSS = (bruto + prorrata) * porcentajeSS;
+        let deduccionIRPF = bruto * porcentajeIRPF;
+        let totalDeduccion = deduccionSS + deduccionIRPF;
+        
+        let neto = bruto - totalDeduccion;
         return { bruto, neto };
     }
 
     function calcularGlobales(year, conf) {
-        let diasT=0, cVacAnual=0, cConvAnual=0, cAdecAnual=0; let hExtraAnual = Number(conf.extraBase) || 0;
+        let diasT=0, cVacAnual=0, cConvAnual=0, cAdecAnual=0; 
+        let hExtraBase = Number(conf.extraBase) || 0;
+        let hExtraDelAno = 0;
+        let hExtraCobradasAnual = 0; 
+
         for(const [k,est] of Object.entries(datosGuardados)) {
             if(k.startsWith(year)) {
                 if(est===1 || est===2 || est===6) diasT++;
                 if(est===3) cVacAnual++; if(est===4) cConvAnual++; if(est===5) cAdecAnual++;
             }
         }
-        for(const [k,val] of Object.entries(horasExtra)) { if(k.startsWith(year)) hExtraAnual += Number(val)||0; }
-        
-        document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75).toFixed(1) + "h";
-        
-        document.getElementById('statHorasExtra').innerText = hExtraAnual.toFixed(1) + "h";
-        document.getElementById('statVacaciones').innerText = cVacAnual;
-        document.getElementById('statConvenio').innerText = cConvAnual;
-        document.getElementById('statAdecuacion').innerText = cAdecAnual;
-        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${Number(conf.adecTotal) || 8})`;
 
         let sumBruto = 0, sumNeto = 0;
         for (let m=1; m<=12; m++) {
+            let params = getMesParams(year, m);
+            const dInM = new Date(year, m, 0).getDate();
+            for(let d=1; d<=dInM; d++) {
+                let k = `${year}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let v = datosGuardados[k] || 0;
+                if(horasExtra[k]) {
+                    let h = Number(horasExtra[k]) || 0;
+                    hExtraDelAno += h;
+                    
+                    let dObj = new Date(year, m-1, d); let w = dObj.getDay();
+                    if(w === 0 || w === 6 || v === 2) {
+                        if(params.cobrarEstructurales) hExtraCobradasAnual += h;
+                    } else {
+                        if(params.cobrarExtras) hExtraCobradasAnual += h;
+                    }
+                }
+            }
             let res = simularMes(year, m, conf);
             sumBruto += res.bruto; sumNeto += res.neto;
         }
 
+        let hExtraTotal = hExtraBase + hExtraDelAno;
+
+        document.getElementById('statHorasTrabajadas').innerText = (diasT * 7.75).toFixed(1) + "h";
+        
+        let statHE = document.getElementById('statHorasExtra');
+        statHE.innerText = hExtraTotal.toFixed(1) + "h";
+        
+        if (hExtraCobradasAnual >= 80) {
+            statHE.style.color = "var(--color-festivo)";
+            statHE.innerHTML += '<br><span style="font-size:0.5em; background:#ff1744; color:#fff; padding:1px 3px; border-radius:3px;">⚠️ LÍMITE 80H</span>';
+        } else if (hExtraCobradasAnual >= 65) {
+            statHE.style.color = "var(--color-convenio)";
+        } else {
+            statHE.style.color = "#fff";
+        }
+        
+        document.getElementById('statVacaciones').innerText = cVacAnual;
+        document.getElementById('statConvenio').innerText = cConvAnual;
+        document.getElementById('statAdecuacion').innerText = cAdecAnual;
+        document.getElementById('statAdecSub').innerText = `(${cAdecAnual}/${Number(conf.adecTotal) || 8})`;
         document.getElementById('statTotalEurosConfig').innerText = fmtM(sumBruto) + " €";
         document.getElementById('statTotalNetoAnual').innerText = fmtM(sumNeto) + " € (Neto Estimado)";
     }
@@ -681,14 +742,18 @@
 
         document.getElementById('printMesLbl').innerText = `- ${["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"][month-1]} ${year}`;
 
-        let cN = 0, cF = 0, hExtraMes = 0; const daysInMonth = new Date(year, month, 0).getDate();
+        let cN = 0, cF = 0, hExOrdinaria = 0, hEstructural = 0; const daysInMonth = new Date(year, month, 0).getDate();
         for(let d=1; d<=daysInMonth; d++) {
             let k = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             let v = datosGuardados[k] || 0; if(v===1) cN++; if(v===2) { cN++; cF++; }
-            if(horasExtra[k]) hExtraMes += Number(horasExtra[k])||0;
+            if(horasExtra[k]) {
+                let dObj = new Date(year, month-1, d); let w = dObj.getDay();
+                if(w === 0 || w === 6 || v === 2) hEstructural += Number(horasExtra[k]);
+                else hExOrdinaria += Number(horasExtra[k]);
+            }
         }
 
-        let hNoche = cN * 7.75; let hGarantia = hNoche / 2; let hFestivo = cF * 7.75;
+        let hNoche = cN * 7.75; let hGarantia = cN * 3.75; let hFestivo = cF * 7.75;
         
         let impBase = Number(conf.salario) || 0; 
         let impNoche = hNoche * (Number(conf.noche) || 0); 
@@ -700,21 +765,40 @@
         let rowPagaExtra = impPagaExtra > 0 ? `<tr><td>Paga Extra ${month===6?'Junio':'Navidad'}</td><td>1.00</td><td>${fmtM(conf.pagaExtra)} €</td><td>${fmtM(impPagaExtra)} €</td></tr>` : "";
         let rowOtros = impOtros > 0 ? `<tr><td>Otros (K70, etc)</td><td>1.00</td><td>-</td><td>${fmtM(impOtros)} €</td></tr>` : "";
         
-        let impExtras = 0; let rowExtras = "";
-        if(hExtraMes !== 0) {
+        let impExOrd = 0; let impEstruct = 0; let rowExtras = "";
+        
+        if(hExOrdinaria !== 0) {
             if (params.cobrarExtras) {
-                impExtras = hExtraMes * (Number(conf.precioExtra) || 20);
-                rowExtras = `<tr><td>Horas Extra (Cobradas)</td><td>${hExtraMes.toFixed(2)}</td><td>${fmtM(conf.precioExtra || 20)} €</td><td>${fmtM(impExtras)} €</td></tr>`;
+                impExOrd = hExOrdinaria * (Number(conf.precioExtra) || 0);
+                rowExtras += `<tr><td>Horas Extra (L-V)</td><td>${hExOrdinaria.toFixed(2)}</td><td>${fmtM(conf.precioExtra || 0)} €</td><td>${fmtM(impExOrd)} €</td></tr>`;
             } else {
-                rowExtras = `<tr><td>Horas Extra (A Bolsa)</td><td>${hExtraMes.toFixed(2)}</td><td>-</td><td>(0,00 €)</td></tr>`;
+                rowExtras += `<tr><td>Horas Extra (A Bolsa)</td><td>${hExOrdinaria.toFixed(2)}</td><td>-</td><td>(0,00 €)</td></tr>`;
+            }
+        }
+        
+        if(hEstructural !== 0) {
+            if (params.cobrarEstructurales) {
+                impEstruct = hEstructural * (Number(conf.precioEstructural) || 0);
+                rowExtras += `<tr><td>Horas Estructurales (Sáb/Dom/Fest)</td><td>${hEstructural.toFixed(2)}</td><td>${fmtM(conf.precioEstructural || 0)} €</td><td>${fmtM(impEstruct)} €</td></tr>`;
+            } else {
+                rowExtras += `<tr><td>H. Estructurales (A Bolsa)</td><td>${hEstructural.toFixed(2)}</td><td>-</td><td>(0,00 €)</td></tr>`;
             }
         }
         
         let valPrima = Number(params.prima) || 0;
         let rowPrima = valPrima !== 0 ? `<tr><td>Prima / Conceptos Atípicos</td><td>1.00</td><td>-</td><td>${fmtM(valPrima)} €</td></tr>` : "";
 
-        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros + impExtras + valPrima;
-        let totalDeduccion = totalBruto * (Number(params.irpf) || 0);
+        let totalBruto = impBase + impNoche + impGarantia + impFestivo + impPagaExtra + impOtros + impExOrd + impEstruct + valPrima;
+        
+        let prorrata = (Number(conf.pagaExtra) * 2) / 12;
+        let porcentajeSS = 0.065; 
+        let porcentajeIRPF = (Number(params.irpf) || 0) - porcentajeSS;
+        if (porcentajeIRPF < 0) porcentajeIRPF = 0;
+        
+        let deduccionSS = (totalBruto + prorrata) * porcentajeSS;
+        let deduccionIRPF = totalBruto * porcentajeIRPF;
+        let totalDeduccion = deduccionSS + deduccionIRPF;
+        
         let liquido = totalBruto - totalDeduccion;
 
         let html = `
@@ -742,9 +826,8 @@
             let opt = document.createElement('option'); opt.value = `${y}-${String(i+1).padStart(2,'0')}`; opt.text = meses[i] + " " + y; sel.appendChild(opt);
         }
         
-        // V43: SELECCIONAR MES VENCIDO (Muestra el mes anterior al que estás viendo en el calendario principal)
-        let targetMonthIdx = fechaActual.getMonth(); // 0 a 11
-        let targetMonthStr = targetMonthIdx === 0 ? "01" : String(targetMonthIdx).padStart(2, '0');
+        let targetMonthIdx = fechaActual.getMonth() === 0 ? 0 : fechaActual.getMonth() - 1;
+        let targetMonthStr = String(targetMonthIdx + 1).padStart(2, '0');
         sel.value = `${y}-${targetMonthStr}`;
     }
 
@@ -760,7 +843,9 @@
         
         document.getElementById('confSalario').value = conf.salario || 0; document.getElementById('confPagaExtra').value = conf.pagaExtra || 0;
         document.getElementById('confNoche').value = conf.noche || 0; document.getElementById('confGarantia').value = conf.garantia || 0;
-        document.getElementById('confFestivo').value = conf.festivo || 0; document.getElementById('confPrecioExtra').value = conf.precioExtra || 20;
+        document.getElementById('confFestivo').value = conf.festivo || 0; 
+        document.getElementById('confPrecioExtra').value = conf.precioExtra || 0;
+        document.getElementById('confPrecioEstructural').value = conf.precioEstructural || 0;
         document.getElementById('confOtros').value = conf.otros || 0; document.getElementById('confMesesOtros').value = conf.mesesOtros !== undefined ? conf.mesesOtros : 12;
         document.getElementById('confDeduccion').value = conf.deduccion || 0; document.getElementById('confBolsa').value = conf.bolsa || 0;
         document.getElementById('confExtraBase').value = conf.extraBase || 0; document.getElementById('confAdecTotal').value = conf.adecTotal || 8;
@@ -771,6 +856,7 @@
             document.getElementById('overrideDeduccion').value = params.irpf;
             document.getElementById('primaMes').value = params.prima || "";
             document.getElementById('cobrarExtrasCb').checked = params.cobrarExtras;
+            document.getElementById('cobrarEstructuralesCb').checked = params.cobrarEstructurales;
         } else {
             initMonthSelector();
         }
@@ -786,7 +872,8 @@
         configAnual[y].mesesParams[m] = {
             irpf: parseFloat(document.getElementById('overrideDeduccion').value) || 0,
             prima: parseFloat(document.getElementById('primaMes').value) || 0,
-            cobrarExtras: document.getElementById('cobrarExtrasCb').checked
+            cobrarExtras: document.getElementById('cobrarExtrasCb').checked,
+            cobrarEstructurales: document.getElementById('cobrarEstructuralesCb').checked
         };
         localStorage.setItem(K_CONF, JSON.stringify(configAnual));
         renderNominaDetallada(); calcularGlobales(fechaActual.getFullYear(), getConf(fechaActual.getFullYear()));
@@ -798,7 +885,9 @@
         let conf = configAnual[y];
         conf.salario = parseFloat(document.getElementById('confSalario').value) || 0; conf.pagaExtra = parseFloat(document.getElementById('confPagaExtra').value) || 0;
         conf.noche = parseFloat(document.getElementById('confNoche').value) || 0; conf.garantia = parseFloat(document.getElementById('confGarantia').value) || 0;
-        conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0; conf.precioExtra = parseFloat(document.getElementById('confPrecioExtra').value) || 0;
+        conf.festivo = parseFloat(document.getElementById('confFestivo').value) || 0; 
+        conf.precioExtra = parseFloat(document.getElementById('confPrecioExtra').value) || 0;
+        conf.precioEstructural = parseFloat(document.getElementById('confPrecioEstructural').value) || 0;
         conf.otros = parseFloat(document.getElementById('confOtros').value) || 0; conf.mesesOtros = parseFloat(document.getElementById('confMesesOtros').value) || 0;
         conf.deduccion = parseFloat(document.getElementById('confDeduccion').value) || 0; conf.bolsa = parseFloat(document.getElementById('confBolsa').value) || 0;
         conf.extraBase = parseFloat(document.getElementById('confExtraBase').value) || 0; conf.adecTotal = parseFloat(document.getElementById('confAdecTotal').value) || 8;
