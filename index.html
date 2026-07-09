@@ -1,293 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,
-initial-scale=1.0">
-<title>Nómina App Stellantis V49</title>
-<style>
-:root {
---bg-dark: #121212;
---panel-bg: #1e1e1e;
---accent-blue: #2196F3;
---accent-green: #4CAF50;
---accent-red: #F44336;
---text-light: #ffffff;
---text-gray: #aaaaaa;
-}
-body {
-background-color: var(--bg-dark);
-color: var(--text-light);
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana,
-
-sans-serif;
-
-margin: 0;
-padding: 0;
-}
-header {
-background-color: var(--panel-bg);
-padding: 15px;
-text-align: center;
-border-bottom: 2px solid #333;
-}
-#mesTitulo {
-font-size: 1.3em;
-font-weight: bold;
-
-text-transform: uppercase;
-}
-#subTitulo {
-font-size: 0.9em;
-color: var(--accent-green);
-margin-top: 5px;
-}
-.container {
-padding: 15px;
-max-width: 600px;
-margin: 0 auto;
-}
-.calendar-grid {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-gap: 8px;
-margin-top: 15px;
-}
-.day-cell {
-background-color: #333;
-border-radius: 6px;
-padding: 15px 5px;
-text-align: center;
-font-weight: bold;
-cursor: pointer;
-user-select: none;
-transition: 0.2s;
-}
-.day-cell.noche { background-color: var(--accent-blue); }
-.day-cell.festivo { background-color: var(--accent-red); }
-.day-cell.vacacion { background-color: var(--accent-green);
-
-}
-
-.desglose-panel {
-margin-top: 25px;
-background-color: var(--panel-bg);
-padding: 20px;
-border-radius: 8px;
-}
-.fila-desglose {
-display: flex;
-justify-content: space-between;
-margin-bottom: 10px;
-border-bottom: 1px solid #333;
-padding-bottom: 5px;
-}
-.fila-desglose.total {
-font-weight: bold;
-
-font-size: 1.1em;
-border-bottom: none;
-margin-top: 15px;
-}
-.g70-highlight {
-color: var(--accent-green);
-}
-.deducciones {
-color: var(--accent-red);
-}
-.liquido {
-color: var(--accent-blue);
-font-size: 1.3em;
-font-weight: bold;
-}
-.version-tag {
-text-align: center;
-color: var(--text-gray);
-font-size: 0.8em;
-margin-top: 30px;
-padding-bottom: 20px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nómina App Stellantis V49</title>
+    <style>
+        :root { --bg-dark: #121212; --panel-bg: #1e1e1e; --accent-blue: #2196F3; --accent-green: #4CAF50; --accent-red: #F44336; --text-light: #ffffff; --text-gray: #aaaaaa; }
+        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        header { background-color: var(--panel-bg); padding: 15px; text-align: center; border-bottom: 2px solid #333; }
+        #mesTitulo { font-size: 1.3em; font-weight: bold; text-transform: uppercase; }
+        #subTitulo { font-size: 0.9em; color: var(--accent-green); margin-top: 5px; }
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
+        .day-cell { background-color: #333; border-radius: 6px; padding: 15px 5px; text-align: center; font-weight: bold; cursor: pointer; user-select: none; transition: 0.2s; }
+        .day-cell.noche { background-color: var(--accent-blue); }
+        .day-cell.festivo { background-color: var(--accent-red); }
+        .day-cell.vacacion { background-color: var(--accent-green); }
+        .desglose-panel { margin-top: 25px; background-color: var(--panel-bg); padding: 20px; border-radius: 8px; }
+        .fila-desglose { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .fila-desglose.total { font-weight: bold; font-size: 1.1em; border-bottom: none; margin-top: 15px; }
+        .g70-highlight { color: var(--accent-green); }
+        .deducciones { color: var(--accent-red); }
+        .liquido { color: var(--accent-blue); font-size: 1.3em; font-weight: bold; }
+        .version-tag { text-align: center; color: var(--text-gray); font-size: 0.8em; margin-top: 30px; padding-bottom: 20px; }
+    </style>
 </head>
 <body>
-<header>
-<div id="mesTitulo"></div>
-<div id="subTitulo"></div>
-</header>
-<div class="container">
-<!-- Calendario Interactivo -->
-<div class="calendar-grid" id="calendarGrid"></div>
-<!-- Panel de Desglose Financiero -->
-<div class="desglose-panel" id="desglosePanel"></div>
-<div class="version-tag">V49 ACTUALIZADA (VACACIONES Y
 
-DECALAJE)</div>
-</div>
-<script>
-// Motor de Datos V49
-const PRECIO_BASE_DIA = 83.8790;
-const PRECIO_K75 = 2.2909;
-const RATIO_K75 = 3.75;
-const UNIDAD_K05 = 3.1517; // Aproximación por hora (512.95
+    <header>
+        <div id="mesTitulo"></div>
+        <div id="subTitulo"></div>
+    </header>
 
-/ 162.75)
+    <div class="container">
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="desglose-panel" id="desglosePanel"></div>
+        <div class="version-tag">V49 ACTUALIZADA (VACACIONES Y DECALAJE)</div>
+    </div>
 
-const PRECIO_KA9_HORA = 7.9452;
-const meses = ["Enero", "Febrero", "Marzo", "Abril",
-"Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre",
-"Noviembre", "Diciembre"];
+    <script>
+        const PRECIO_BASE_DIA = 83.8790;
+        const PRECIO_K75 = 2.2909;
+        const RATIO_K75 = 3.75;
+        const UNIDAD_K05 = 3.1517; 
+        const PRECIO_KA9_HORA = 7.9452;
 
-// Estado inicial simulando Mayo 2026 para testing
-let mesActualIndex = 4; // Mayo
-let anioActual = 2026;
-let diasMes = 31;
-// Memoria temporal del calendario
-let estadoDias = new Array(diasMes).fill('libre');
-function inicializarUI() {
-renderizarCabecera();
-renderizarCalendario();
-calcularNómina();
-}
-// PASO A: Lógica de Decalaje de Cobro
-function renderizarCabecera() {
-let mesCobroIndex = (mesActualIndex + 1) % 12;
-let anioCobro = mesCobroIndex === 0 ? anioActual + 1 :
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        
+        let mesActualIndex = 4; // Mayo
+        let anioActual = 2026;
+        let diasMes = 31;
+        let estadoDias = new Array(diasMes).fill('libre');
 
-anioActual;
+        function inicializarUI() {
+            renderizarCabecera();
+            renderizarCalendario();
+            calcularNomina();
+        }
 
-document.getElementById('mesTitulo').innerText = `COBRO
+        function renderizarCabecera() {
+            let mesCobroIndex = (mesActualIndex + 1) % 12;
+            let anioCobro = mesCobroIndex === 0 ? anioActual + 1 : anioActual;
+            document.getElementById('mesTitulo').innerText = `COBRO EN ${meses[mesCobroIndex].toUpperCase()} ${anioCobro}`;
+            document.getElementById('subTitulo').innerText = `(Período de trabajo: ${meses[mesActualIndex]})`;
+        }
 
-EN ${meses[mesCobroIndex].toUpperCase()} ${anioCobro}`;
-document.getElementById('subTitulo').innerText =
+        function renderizarCalendario() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < diasMes; i++) {
+                let div = document.createElement('div');
+                div.className = `day-cell ${estadoDias[i]}`;
+                div.innerText = i + 1;
+                div.onclick = () => rotarEstado(i);
+                grid.appendChild(div);
+            }
+        }
 
-`(Período de trabajo: ${meses[mesActualIndex]})`;
+        function rotarEstado(index) {
+            const estados = ['libre', 'noche', 'festivo', 'vacacion'];
+            let currentIdx = estados.indexOf(estadoDias[index]);
+            estadoDias[index] = estados[(currentIdx + 1) % estados.length];
+            renderizarCalendario();
+            calcularNomina();
+        }
 
-}
-function renderizarCalendario() {
-const grid = document.getElementById('calendarGrid');
-grid.innerHTML = '';
-for (let i = 0; i < diasMes; i++) {
-let div = document.createElement('div');
-div.className = `day-cell ${estadoDias[i]}`;
-div.innerText = i + 1;
-div.onclick = () => rotarEstado(i);
-grid.appendChild(div);
-}
-}
-function rotarEstado(index) {
-const estados = ['libre', 'noche', 'festivo',
+        function calcularNomina() {
+            let noches = estadoDias.filter(d => d === 'noche').length;
+            let festivos = estadoDias.filter(d => d === 'festivo').length;
+            let vacaciones = estadoDias.filter(d => d === 'vacacion').length;
 
-'vacacion'];
+            let diasG60 = 30 - vacaciones;
+            if (diasG60 < 0) diasG60 = 0;
 
-let currentIdx = estados.indexOf(estadoDias[index]);
-estadoDias[index] = estados[(currentIdx + 1) %
+            let totalG60 = diasG60 * PRECIO_BASE_DIA;
+            let totalG70 = vacaciones * PRECIO_BASE_DIA;
+            let totalK05 = noches * 7.75 * UNIDAD_K05;
+            let totalK75 = noches * RATIO_K75 * PRECIO_K75;
+            let totalKA9 = festivos * 7.75 * PRECIO_KA9_HORA; 
+            
+            let fijosMensuales = 32.71; 
+            let pagaExtra = (mesActualIndex === 4) ? 2516.37 : 0;
 
-estados.length];
+            let totalDevengos = totalG60 + totalG70 + totalK05 + totalK75 + totalKA9 + fijosMensuales + pagaExtra;
+            let porcentajeRetencion = 0.2703;
+            let totalDeducciones = totalDevengos * porcentajeRetencion;
+            let liquido = totalDevengos - totalDeducciones;
 
-renderizarCalendario();
-calcularNómina();
-}
-// PASO B: Segregación G60 / G70 y Cálculo Base
-function calcularNómina() {
-let noches = estadoDias.filter(d => d ===
+            renderizarDesglose(diasG60, totalG60, vacaciones, totalG70, totalK05, totalK75, totalKA9, fijosMensuales, pagaExtra, totalDevengos, totalDeducciones, liquido);
+        }
 
-'noche').length;
+        function renderizarDesglose(diasG60, g60, diasG70, g70, k05, k75, ka9, fijos, extra, devengos, deducciones, liquido) {
+            let panel = document.getElementById('desglosePanel');
+            let html = `<div class="fila-desglose"><span>G60 Salario Base (${diasG60}d)</span><span>${g60.toFixed(2)} €</span></div>`;
+            if (diasG70 > 0) {
+                html += `<div class="fila-desglose g70-highlight"><span>G70 Salario Vacaciones (${diasG70}d)</span><span>${g70.toFixed(2)} €</span></div>`;
+            }
+            html += `
+                <div class="fila-desglose"><span>K05 Nocturnidad</span><span>${k05.toFixed(2)} €</span></div>
+                <div class="fila-desglose"><span>K75 Garantía Nocturna</span><span>${k75.toFixed(2)} €</span></div>
+                <div class="fila-desglose"><span>KA9 Festivos / Fin de Sem.</span><span>${ka9.toFixed(2)} €</span></div>
+                <div class="fila-desglose"><span>Conceptos Fijos (KEA, K70, Transp)</span><span>${fijos.toFixed(2)} €</span></div>
+            `;
+            if (extra > 0) {
+                html += `<div class="fila-desglose g70-highlight"><span>T00 Paga Extraordinaria</span><span>${extra.toFixed(2)} €</span></div>`;
+            }
+            html += `
+                <div class="fila-desglose total"><span>TOTAL DEVENGADO</span><span>${devengos.toFixed(2)} €</span></div>
+                <div class="fila-desglose deducciones"><span>Deducciones (IRPF + S.S.)</span><span>-${deducciones.toFixed(2)} €</span></div>
+                <div class="fila-desglose total liquido"><span>LÍQUIDO A PERCIBIR</span><span>${liquido.toFixed(2)} €</span></div>
+            `;
+            panel.innerHTML = html;
+        }
 
-let festivos = estadoDias.filter(d => d ===
+        window.onload = inicializarUI;
+    </script>
 
-'festivo').length;
-
-let vacaciones = estadoDias.filter(d => d ===
-
-'vacacion').length;
-
-// Restricción fiscal: Stellantis computa 30 días
-
-máximos por mes
-
-let diasG60 = 30 - vacaciones;
-if (diasG60 < 0) diasG60 = 0;
-let totalG60 = diasG60 * PRECIO_BASE_DIA;
-let totalG70 = vacaciones * PRECIO_BASE_DIA;
-let totalK05 = noches * 7.75 * UNIDAD_K05;
-let totalK75 = noches * RATIO_K75 * PRECIO_K75;
-let totalKA9 = festivos * 7.75 * PRECIO_KA9_HORA;
-// Fijos del mes (KEA, K70, Transporte simulados)
-let fijosMensuales = 32.71;
-// Paga extra en Mayo (simulada si el mes es mayo)
-let pagaExtra = (mesActualIndex === 4) ? 2516.37 : 0;
-let totalDevengos = totalG60 + totalG70 + totalK05 +
-
-totalK75 + totalKA9 + fijosMensuales + pagaExtra;
-
-// Simulador de IRPF + SS (Ejemplo: 27.03% en Mayo)
-let porcentajeRetencion = 0.2703;
-let totalDeducciones = totalDevengos *
-
-porcentajeRetencion;
-
-let liquido = totalDevengos - totalDeducciones;
-renderizarDesglose(diasG60, totalG60, vacaciones,
-totalG70, totalK05, totalK75, totalKA9, fijosMensuales, pagaExtra,
-totalDevengos, totalDeducciones, liquido);
-
-}
-
-function renderizarDesglose(diasG60, g60, diasG70, g70,
-k05, k75, ka9, fijos, extra, devengos, deducciones, liquido) {
-let panel = document.getElementById('desglosePanel');
-let html = `
-<div class="fila-desglose"><span>G60 Salario Base
-(${diasG60}d)</span><span>${g60.toFixed(2)} €</span></div>
-
-`;
-if (diasG70 > 0) {
-html += `<div class="fila-desglose
-g70-highlight"><span>G70 Salario Vacaciones
-(${diasG70}d)</span><span>${g70.toFixed(2)} €</span></div>`;
-
-}
-html += `
-<div class="fila-desglose"><span>K05
-Nocturnidad</span><span>${k05.toFixed(2)} €</span></div>
-<div class="fila-desglose"><span>K75 Garantía
-
-Nocturna</span><span>${k75.toFixed(2)} €</span></div>
-
-<div class="fila-desglose"><span>KA9 Festivos / Fin
-
-de Sem.</span><span>${ka9.toFixed(2)} €</span></div>
-
-<div class="fila-desglose"><span>Conceptos Fijos
-(KEA, K70, Transp)</span><span>${fijos.toFixed(2)} €</span></div>
-
-`;
-if (extra > 0) {
-html += `<div class="fila-desglose
-
-g70-highlight"><span>T00 Paga
-Extraordinaria</span><span>${extra.toFixed(2)} €</span></div>`;
-
-}
-html += `
-<div class="fila-desglose total"><span>TOTAL
-DEVENGADO</span><span>${devengos.toFixed(2)} €</span></div>
-
-<div class="fila-desglose
-deducciones"><span>Deducciones (IRPF +
-S.S.)</span><span>-${deducciones.toFixed(2)} €</span></div>
-
-<div class="fila-desglose total
-
-liquido"><span>LÍQUIDO A PERCIBIR</span><span>${liquido.toFixed(2)}
-€</span></div>
-`;
-panel.innerHTML = html;
-}
-// Arrancar
-window.onload = inicializarUI;
-</script>
-<script>
+    <!-- Activación del Service Worker -->
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -297,5 +147,4 @@ window.onload = inicializarUI;
         }
     </script>
 </body>
-
 </html>
