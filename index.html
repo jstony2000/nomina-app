@@ -1,150 +1,247 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nómina App Stellantis V49</title>
-    <style>
-        :root { --bg-dark: #121212; --panel-bg: #1e1e1e; --accent-blue: #2196F3; --accent-green: #4CAF50; --accent-red: #F44336; --text-light: #ffffff; --text-gray: #aaaaaa; }
-        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        header { background-color: var(--panel-bg); padding: 15px; text-align: center; border-bottom: 2px solid #333; }
-        #mesTitulo { font-size: 1.3em; font-weight: bold; text-transform: uppercase; }
-        #subTitulo { font-size: 0.9em; color: var(--accent-green); margin-top: 5px; }
-        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
-        .day-cell { background-color: #333; border-radius: 6px; padding: 15px 5px; text-align: center; font-weight: bold; cursor: pointer; user-select: none; transition: 0.2s; }
-        .day-cell.noche { background-color: var(--accent-blue); }
-        .day-cell.festivo { background-color: var(--accent-red); }
-        .day-cell.vacacion { background-color: var(--accent-green); }
-        .desglose-panel { margin-top: 25px; background-color: var(--panel-bg); padding: 20px; border-radius: 8px; }
-        .fila-desglose { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .fila-desglose.total { font-weight: bold; font-size: 1.1em; border-bottom: none; margin-top: 15px; }
-        .g70-highlight { color: var(--accent-green); }
-        .deducciones { color: var(--accent-red); }
-        .liquido { color: var(--accent-blue); font-size: 1.3em; font-weight: bold; }
-        .version-tag { text-align: center; color: var(--text-gray); font-size: 0.8em; margin-top: 30px; padding-bottom: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,
+initial-scale=1.0">
+<title>Nómina V49 FULL</title>
+<style>
+:root { --b: #121212; --p: #1e1e1e; --bl: #2196F3; --g:
+
+#4CAF50; --r: #F44336; --t: #fff; }
+
+body { background: var(--b); color: var(--t); font-family:
+
+sans-serif; margin: 0; }
+
+.hd { display: flex; justify-content: space-between;
+background: #000; padding: 15px; align-items: center; }
+.hd button { background: #333; color: #fff; border: 0;
+padding: 10px 15px; border-radius: 4px; font-size: 1.2em; cursor:
+pointer; }
+
+.cg { display: grid; grid-template-columns: repeat(7, 1fr);
+
+gap: 6px; padding: 15px; }
+
+.dc { background: #333; border-radius: 6px; padding: 25px
+0; text-align: center; font-weight: bold; cursor: pointer; }
+
+.noche { background: var(--bl); }
+.festivo { background: var(--r); }
+.vacacion { background: var(--g); }
+.pn { background: var(--p); padding: 20px; margin: 15px;
+
+border-radius: 8px; }
+
+.fl { display: flex; justify-content: space-between;
+
+padding: 8px 0; border-bottom: 1px solid #333; }
+
+.mod { display: none; position: fixed; top: 0; background:
+
+rgba(0,0,0,.8); width: 100%; height: 100%; z-index: 100; }
+.mc { background: var(--p); padding: 25px; margin: 50px
+
+auto; width: 80%; border-radius: 8px; }
+
+input { width: 100%; padding: 12px; margin: 8px 0 15px;
+background: #333; color: #fff; border: 0; box-sizing: border-box; }
+</style>
 </head>
 <body>
+<div class="hd">
 
-    <header>
-        <div id="mesTitulo"></div>
-        <div id="subTitulo"></div>
-    </header>
+<button onclick="cM(-1)">◀</button>
+<div style="text-align:center">
+<h3 id="mt" style="margin:0;font-size:1.3em"></h3>
+<small id="st" style="color:var(--g)"></small>
+</div>
+<button onclick="cM(1)">▶</button>
+<button onclick="m(1)">⚙</button>
+</div>
+<div class="cg" id="cg"></div>
+<div class="pn" id="dp"></div>
+<div class="mod" id="md">
+<div class="mc">
+<h3 style="margin-top:0">Ajustes del Mes</h3>
+Fijos (KEA, K70) €: <input id="iF" type="number"
 
-    <div class="container">
-        <div class="calendar-grid" id="calendarGrid"></div>
-        <div class="desglose-panel" id="desglosePanel"></div>
-        <div class="version-tag">V49 ACTUALIZADA (VACACIONES Y DECALAJE)</div>
-    </div>
+step="0.01">
 
-    <script>
-        const PRECIO_BASE_DIA = 83.8790;
-        const PRECIO_K75 = 2.2909;
-        const RATIO_K75 = 3.75;
-        const UNIDAD_K05 = 3.1517; 
-        const PRECIO_KA9_HORA = 7.9452;
+Paga Extra/Atrasos €: <input id="iE" type="number"
 
-        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        
-        let mesActualIndex = 4; // Mayo
-        let anioActual = 2026;
-        let diasMes = 31;
-        let estadoDias = new Array(diasMes).fill('libre');
+step="0.01">
 
-        function inicializarUI() {
-            renderizarCabecera();
-            renderizarCalendario();
-            calcularNomina();
-        }
+% IRPF+SS (Ej: 0.2705): <input id="iR" type="number"
 
-        function renderizarCabecera() {
-            let mesCobroIndex = (mesActualIndex + 1) % 12;
-            let anioCobro = mesCobroIndex === 0 ? anioActual + 1 : anioActual;
-            document.getElementById('mesTitulo').innerText = `COBRO EN ${meses[mesCobroIndex].toUpperCase()} ${anioCobro}`;
-            document.getElementById('subTitulo').innerText = `(Período de trabajo: ${meses[mesActualIndex]})`;
-        }
+step="0.0001">
 
-        function renderizarCalendario() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-            for (let i = 0; i < diasMes; i++) {
-                let div = document.createElement('div');
-                div.className = `day-cell ${estadoDias[i]}`;
-                div.innerText = i + 1;
-                div.onclick = () => rotarEstado(i);
-                grid.appendChild(div);
-            }
-        }
+<button onclick="m(0)"
 
-        function rotarEstado(index) {
-            const estados = ['libre', 'noche', 'festivo', 'vacacion'];
-            let currentIdx = estados.indexOf(estadoDias[index]);
-            estadoDias[index] = estados[(currentIdx + 1) % estados.length];
-            renderizarCalendario();
-            calcularNomina();
-        }
+style="width:100%;padding:15px;background:var(--r);color:#fff;borde
+r:0;font-weight:bold;cursor:pointer;">GUARDAR DATOS</button>
 
-        function calcularNomina() {
-            let noches = estadoDias.filter(d => d === 'noche').length;
-            let festivos = estadoDias.filter(d => d === 'festivo').length;
-            let vacaciones = estadoDias.filter(d => d === 'vacacion').length;
+</div>
+</div>
+<script>
+let a = 2026, ms = 4, db =
 
-            let diasG60 = 30 - vacaciones;
-            if (diasG60 < 0) diasG60 = 0;
+JSON.parse(localStorage.getItem('nDB')) || {};
 
-            let totalG60 = diasG60 * PRECIO_BASE_DIA;
-            let totalG70 = vacaciones * PRECIO_BASE_DIA;
-            let totalK05 = noches * 7.75 * UNIDAD_K05;
-            let totalK75 = noches * RATIO_K75 * PRECIO_K75;
-            let totalKA9 = festivos * 7.75 * PRECIO_KA9_HORA; 
-            
-            let fijosMensuales = 32.71; 
-            let pagaExtra = (mesActualIndex === 4) ? 2516.37 : 0;
+const msN = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO",
+"JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE",
+"DICIEMBRE"];
 
-            let totalDevengos = totalG60 + totalG70 + totalK05 + totalK75 + totalKA9 + fijosMensuales + pagaExtra;
-            let porcentajeRetencion = 0.2703;
-            let totalDeducciones = totalDevengos * porcentajeRetencion;
-            let liquido = totalDevengos - totalDeducciones;
+function iM() {
+let k = a + '-' + ms;
+if (!db[k]) db[k] = { d: Array(31).fill('libre'), f:
 
-            renderizarDesglose(diasG60, totalG60, vacaciones, totalG70, totalK05, totalK75, totalKA9, fijosMensuales, pagaExtra, totalDevengos, totalDeducciones, liquido);
-        }
+32.71, e: ms === 4 ? 2516.37 : 0, r: 0.2703 };
 
-        function renderizarDesglose(diasG60, g60, diasG70, g70, k05, k75, ka9, fijos, extra, devengos, deducciones, liquido) {
-            let panel = document.getElementById('desglosePanel');
-            let html = `<div class="fila-desglose"><span>G60 Salario Base (${diasG60}d)</span><span>${g60.toFixed(2)} €</span></div>`;
-            if (diasG70 > 0) {
-                html += `<div class="fila-desglose g70-highlight"><span>G70 Salario Vacaciones (${diasG70}d)</span><span>${g70.toFixed(2)} €</span></div>`;
-            }
-            html += `
-                <div class="fila-desglose"><span>K05 Nocturnidad</span><span>${k05.toFixed(2)} €</span></div>
-                <div class="fila-desglose"><span>K75 Garantía Nocturna</span><span>${k75.toFixed(2)} €</span></div>
-                <div class="fila-desglose"><span>KA9 Festivos / Fin de Sem.</span><span>${ka9.toFixed(2)} €</span></div>
-                <div class="fila-desglose"><span>Conceptos Fijos (KEA, K70, Transp)</span><span>${fijos.toFixed(2)} €</span></div>
-            `;
-            if (extra > 0) {
-                html += `<div class="fila-desglose g70-highlight"><span>T00 Paga Extraordinaria</span><span>${extra.toFixed(2)} €</span></div>`;
-            }
-            html += `
-                <div class="fila-desglose total"><span>TOTAL DEVENGADO</span><span>${devengos.toFixed(2)} €</span></div>
-                <div class="fila-desglose deducciones"><span>Deducciones (IRPF + S.S.)</span><span>-${deducciones.toFixed(2)} €</span></div>
-                <div class="fila-desglose total liquido"><span>LÍQUIDO A PERCIBIR</span><span>${liquido.toFixed(2)} €</span></div>
-            `;
-            panel.innerHTML = html;
-        }
+rUI();
+}
+function sv() {
+localStorage.setItem('nDB', JSON.stringify(db));
+rUI();
+}
+function cM(d) {
+ms += d;
+if (ms > 11) { ms = 0; a++; }
 
-        window.onload = inicializarUI;
-    </script>
+if (ms < 0) { ms = 11; a--; }
+iM();
+}
+function rD(i) {
+let e = ['libre', 'noche', 'festivo', 'vacacion'], k =
 
-    <!-- Activación del Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registrado con éxito.', reg))
-                    .catch(err => console.error('Error al registrar el Service Worker:', err));
-            });
-        }
-    </script>
+a + '-' + ms;
+
+db[k].d[i] = e[(e.indexOf(db[k].d[i]) + 1) % 4];
+sv();
+}
+function m(o) {
+let k = a + '-' + ms;
+if (o) {
+document.getElementById('iF').value = db[k].f;
+document.getElementById('iE').value = db[k].e;
+document.getElementById('iR').value = db[k].r;
+document.getElementById('md').style.display =
+
+'block';
+
+} else {
+db[k].f =
+
+parseFloat(document.getElementById('iF').value) || 0;
+
+db[k].e =
+
+parseFloat(document.getElementById('iE').value) || 0;
+
+db[k].r =
+
+parseFloat(document.getElementById('iR').value) || 0;
+
+document.getElementById('md').style.display =
+
+'none';
+
+sv();
+}
+}
+function rUI() {
+let k = a + '-' + ms, dt = db[k], mc = (ms + 1) % 12,
+
+ac = mc === 0 ? a + 1 : a;
+
+document.getElementById('mt').innerText = `COBRO EN
+
+${msN[mc]} ${ac}`;
+
+document.getElementById('st').innerText = `(Trabajo:
+
+${msN[ms]})`;
+
+let g = document.getElementById('cg');
+g.innerHTML = '';
+let n = 0, f = 0, v = 0, dd = new Date(a, ms + 1,
+
+0).getDate();
+
+for (let i = 0; i < dd; i++) {
+let s = dt.d[i];
+if (s === 'noche') n++;
+if (s === 'festivo') f++;
+if (s === 'vacacion') v++;
+
+g.innerHTML += `<div class="dc ${s}"
+
+onclick="rD(${i})">${i + 1}</div>`;
+
+}
+let dg = Math.max(0, 30 - v),
+t6 = dg * 83.879,
+t7 = v * 83.879,
+t0 = n * 7.75 * 3.1517,
+t5 = n * 3.75 * 2.2909,
+t9 = f * 7.75 * 7.9452,
+dev = t6 + t7 + t0 + t5 + t9 + dt.f + dt.e,
+ded = dev * dt.r,
+lq = dev - ded;
+document.getElementById('dp').innerHTML = `
+<div class="fl"><span>G60 Base
+(${dg}d)</span><span>${t6.toFixed(2)} €</span></div>
+
+${v > 0 ? `<div class="fl"
+style="color:var(--g)"><span>G70 Vacaciones
+(${v}d)</span><span>${t7.toFixed(2)} €</span></div>` : ''}
+
+<div class="fl"><span>K05
+
+Nocturnidad</span><span>${t0.toFixed(2)} €</span></div>
+
+<div class="fl"><span>K75
+
+Garantía</span><span>${t5.toFixed(2)} €</span></div>
+
+<div class="fl"><span>KA9
+
+Festivos</span><span>${t9.toFixed(2)} €</span></div>
+<div class="fl"><span>Fijos (KEA,
+K70)</span><span>${dt.f.toFixed(2)} €</span></div>
+${dt.e > 0 ? `<div class="fl"
+
+style="color:var(--g)"><span>T00
+Extra/Atrasos</span><span>${dt.e.toFixed(2)} €</span></div>` : ''}
+<div class="fl" style="margin-top:10px"><b>TOTAL
+
+DEVENGADO</b><b>${dev.toFixed(2)} €</b></div>
+
+<div class="fl" style="color:var(--r)"><span>IRPF +
+
+SS</span><span>-${ded.toFixed(2)} €</span></div>
+
+<div class="fl"
+
+style="color:var(--bl);font-size:1.3em;margin-top:5px"><b>LÍQUIDO A
+PERCIBIR</b><b>${lq.toFixed(2)} €</b></div>
+
+`;
+}
+window.onload = iM;
+if ('serviceWorker' in navigator) {
+window.addEventListener('load', () => {
+navigator.serviceWorker.register('./sw.js')
+.then(reg => console.log('Service Worker OK',
+
+reg))
+
+.catch(err => console.error('Service Worker
+
+Error', err));
+});
+}
+</script>
 </body>
 </html>
