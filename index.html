@@ -2,245 +2,203 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,
-initial-scale=1.0">
-<title>Nómina V49 FULL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nómina V50 PRO</title>
 <style>
-:root { --b: #121212; --p: #1e1e1e; --bl: #2196F3; --g:
-
-#4CAF50; --r: #F44336; --t: #fff; }
-
-body { background: var(--b); color: var(--t); font-family:
-
-sans-serif; margin: 0; }
-
-.hd { display: flex; justify-content: space-between;
-background: #000; padding: 15px; align-items: center; }
-.hd button { background: #333; color: #fff; border: 0;
-padding: 10px 15px; border-radius: 4px; font-size: 1.2em; cursor:
-pointer; }
-
-.cg { display: grid; grid-template-columns: repeat(7, 1fr);
-
-gap: 6px; padding: 15px; }
-
-.dc { background: #333; border-radius: 6px; padding: 25px
-0; text-align: center; font-weight: bold; cursor: pointer; }
-
+:root { --b: #121212; --p: #1e1e1e; --bl: #2196F3; --g: #4CAF50; --r: #F44336; --o: #FF9800; --t: #fff; }
+body { background: var(--b); color: var(--t); font-family: sans-serif; margin: 0; padding-bottom: 20px; }
+.hd { display: flex; justify-content: space-between; background: #000; padding: 15px; align-items: center; }
+.hd button { background: #333; color: #fff; border: 0; padding: 10px 15px; border-radius: 4px; font-size: 1.2em; cursor: pointer; }
+.wd { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 10px 15px 0; text-align: center; color: #888; font-size: 0.85em; font-weight: bold; }
+.cg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 10px 15px; }
+.dc { background: #2c2c2c; border-radius: 6px; padding: 18px 0; text-align: center; font-weight: bold; cursor: pointer; user-select: none; }
+.empty { background: transparent; cursor: default; }
 .noche { background: var(--bl); }
 .festivo { background: var(--r); }
 .vacacion { background: var(--g); }
-.pn { background: var(--p); padding: 20px; margin: 15px;
-
-border-radius: 8px; }
-
-.fl { display: flex; justify-content: space-between;
-
-padding: 8px 0; border-bottom: 1px solid #333; }
-
-.mod { display: none; position: fixed; top: 0; background:
-
-rgba(0,0,0,.8); width: 100%; height: 100%; z-index: 100; }
-.mc { background: var(--p); padding: 25px; margin: 50px
-
-auto; width: 80%; border-radius: 8px; }
-
-input { width: 100%; padding: 12px; margin: 8px 0 15px;
-background: #333; color: #fff; border: 0; box-sizing: border-box; }
+.pn { background: var(--p); padding: 18px; margin: 10px 15px; border-radius: 8px; }
+.fl { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #333; font-size: 0.95em; }
+.mod { display: none; position: fixed; top: 0; left: 0; background: rgba(0,0,0,.85); width: 100%; height: 100%; z-index: 100; overflow-y: auto; }
+.mc { background: var(--p); padding: 20px; margin: 20px auto; width: 85%; max-width: 400px; border-radius: 8px; }
+label { font-size: 0.85em; color: #bbb; display: block; margin-top: 8px; }
+input { width: 100%; padding: 10px; margin: 4px 0 8px; background: #333; color: #fff; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+.lg { display: flex; justify-content: space-around; font-size: 0.8em; padding: 0 15px 5px; color: #aaa; }
+.lg span::before { content: "■ "; font-size: 1.2em; }
+.l-n::before { color: var(--bl); }
+.l-f::before { color: var(--r); }
+.l-v::before { color: var(--g); }
 </style>
 </head>
 <body>
-<div class="hd">
 
-<button onclick="cM(-1)">◀</button>
-<div style="text-align:center">
-<h3 id="mt" style="margin:0;font-size:1.3em"></h3>
-<small id="st" style="color:var(--g)"></small>
+<div class="hd">
+  <button onclick="cM(-1)">◀</button>
+  <div style="text-align:center">
+    <h3 id="mt" style="margin:0;font-size:1.25em"></h3>
+    <small id="st" style="color:var(--g)"></small>
+  </div>
+  <button onclick="cM(1)">▶</button>
+  <button onclick="m(1)">⚙</button>
 </div>
-<button onclick="cM(1)">▶</button>
-<button onclick="m(1)">⚙</button>
+
+<div class="lg">
+  <span class="l-n">Noche</span>
+  <span class="l-f">Festivo + Noche</span>
+  <span class="l-v">Vacaciones</span>
+</div>
+
+<div class="wd">
+  <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
 </div>
 <div class="cg" id="cg"></div>
 <div class="pn" id="dp"></div>
+
 <div class="mod" id="md">
-<div class="mc">
-<h3 style="margin-top:0">Ajustes del Mes</h3>
-Fijos (KEA, K70) €: <input id="iF" type="number"
+  <div class="mc">
+    <h3 style="margin-top:0">Ajustes del Mes</h3>
+    <label>Fijos Imponibles (KEA 17.77 + Transp 3.64 + K70) €:</label>
+    <input id="iF" type="number" step="0.01">
+    
+    <label>Paga Extra / Atrasos €:</label>
+    <input id="iE" type="number" step="0.01">
+    
+    <label>% IRPF (Ej: 20.64 para 20,64%):</label>
+    <input id="iR" type="number" step="0.01">
+    
+    <label>Prorrata + Extras Base SS (Mes normal: 443.18) €:</label>
+    <input id="iB" type="number" step="0.01">
+    
+    <label>Deducción F99 Especie (Ej: 1.22) €:</label>
+    <input id="iF99" type="number" step="0.01">
 
-step="0.01">
+    <label>Ajuste Neto / Comedor (KG5 - U27, Ej: 1.98) €:</label>
+    <input id="iNet" type="number" step="0.01">
 
-Paga Extra/Atrasos €: <input id="iE" type="number"
-
-step="0.01">
-
-% IRPF+SS (Ej: 0.2705): <input id="iR" type="number"
-
-step="0.0001">
-
-<button onclick="m(0)"
-
-style="width:100%;padding:15px;background:var(--r);color:#fff;borde
-r:0;font-weight:bold;cursor:pointer;">GUARDAR DATOS</button>
-
+    <button onclick="m(0)" style="width:100%;padding:14px;margin-top:10px;background:var(--bl);color:#fff;border:0;border-radius:4px;font-weight:bold;cursor:pointer;">GUARDAR DATOS</button>
+  </div>
 </div>
-</div>
+
 <script>
-let a = 2026, ms = 4, db =
+let a = 2026, ms = 7, db = JSON.parse(localStorage.getItem('nDB')) || {};
+const msN = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
-JSON.parse(localStorage.getItem('nDB')) || {};
-
-const msN = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO",
-"JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE",
-"DICIEMBRE"];
+const R2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 
 function iM() {
-let k = a + '-' + ms;
-if (!db[k]) db[k] = { d: Array(31).fill('libre'), f:
-
-32.71, e: ms === 4 ? 2516.37 : 0, r: 0.2703 };
-
-rUI();
+  let k = a + '-' + ms;
+  if (!db[k]) {
+    db[k] = { d: Array(31).fill('libre'), f: 38.37, e: 0, irpf: 20.64, bss: 443.18, f99: 1.22, net: 0 };
+  } else {
+    // Migración automática de datos antiguos de V49 a V50
+    if (db[k].irpf === undefined) {
+      let oldR = db[k].r || 0.2714;
+      db[k].irpf = oldR < 1 ? R2((oldR - 0.065) * 100) : oldR;
+      db[k].bss = 443.18;
+      db[k].f99 = 1.22;
+      db[k].net = 0;
+    }
+  }
+  rUI();
 }
+
 function sv() {
-localStorage.setItem('nDB', JSON.stringify(db));
-rUI();
+  localStorage.setItem('nDB', JSON.stringify(db));
+  rUI();
 }
+
 function cM(d) {
-ms += d;
-if (ms > 11) { ms = 0; a++; }
-
-if (ms < 0) { ms = 11; a--; }
-iM();
+  ms += d;
+  if (ms > 11) { ms = 0; a++; }
+  if (ms < 0) { ms = 11; a--; }
+  iM();
 }
+
 function rD(i) {
-let e = ['libre', 'noche', 'festivo', 'vacacion'], k =
-
-a + '-' + ms;
-
-db[k].d[i] = e[(e.indexOf(db[k].d[i]) + 1) % 4];
-sv();
+  let e = ['libre', 'noche', 'festivo', 'vacacion'], k = a + '-' + ms;
+  db[k].d[i] = e[(e.indexOf(db[k].d[i]) + 1) % 4];
+  sv();
 }
+
 function m(o) {
-let k = a + '-' + ms;
-if (o) {
-document.getElementById('iF').value = db[k].f;
-document.getElementById('iE').value = db[k].e;
-document.getElementById('iR').value = db[k].r;
-document.getElementById('md').style.display =
-
-'block';
-
-} else {
-db[k].f =
-
-parseFloat(document.getElementById('iF').value) || 0;
-
-db[k].e =
-
-parseFloat(document.getElementById('iE').value) || 0;
-
-db[k].r =
-
-parseFloat(document.getElementById('iR').value) || 0;
-
-document.getElementById('md').style.display =
-
-'none';
-
-sv();
+  let k = a + '-' + ms;
+  if (o) {
+    document.getElementById('iF').value = db[k].f;
+    document.getElementById('iE').value = db[k].e;
+    document.getElementById('iR').value = db[k].irpf;
+    document.getElementById('iB').value = db[k].bss;
+    document.getElementById('iF99').value = db[k].f99;
+    document.getElementById('iNet').value = db[k].net;
+    document.getElementById('md').style.display = 'block';
+  } else {
+    db[k].f = parseFloat(document.getElementById('iF').value) || 0;
+    db[k].e = parseFloat(document.getElementById('iE').value) || 0;
+    db[k].irpf = parseFloat(document.getElementById('iR').value) || 0;
+    db[k].bss = parseFloat(document.getElementById('iB').value) || 0;
+    db[k].f99 = parseFloat(document.getElementById('iF99').value) || 0;
+    db[k].net = parseFloat(document.getElementById('iNet').value) || 0;
+    document.getElementById('md').style.display = 'none';
+    sv();
+  }
 }
-}
+
 function rUI() {
-let k = a + '-' + ms, dt = db[k], mc = (ms + 1) % 12,
+  let k = a + '-' + ms, dt = db[k], mc = (ms + 1) % 12, ac = mc === 0 ? a + 1 : a;
+  document.getElementById('mt').innerText = `NÓMINA ${msN[ms]} ${a}`;
+  document.getElementById('st').innerText = `(Ingreso fin de ${msN[mc]} ${ac})`;
 
-ac = mc === 0 ? a + 1 : a;
+  let g = document.getElementById('cg');
+  g.innerHTML = '';
+  let n = 0, f = 0, v = 0, dd = new Date(a, ms + 1, 0).getDate();
+  
+  // Alinear día 1 con el día de la semana (Lunes = 0 ... Domingo = 6)
+  let firstDay = (new Date(a, ms, 1).getDay() + 6) % 7;
+  for (let w = 0; w < firstDay; w++) {
+    g.innerHTML += `<div class="dc empty"></div>`;
+  }
 
-document.getElementById('mt').innerText = `COBRO EN
+  for (let i = 0; i < dd; i++) {
+    let s = dt.d[i];
+    if (s === 'noche') n++;
+    if (s === 'festivo') { f++; n++; } // Festivo trabajado en turno noche suma ambos
+    if (s === 'vacacion') v++;
+    g.innerHTML += `<div class="dc ${s}" onclick="rD(${i})">${i + 1}</div>`;
+  }
 
-${msN[mc]} ${ac}`;
+  let dg = Math.max(0, 30 - v),
+      t6 = R2(dg * 83.879),
+      t7 = R2(v * 83.879),
+      t0 = R2(n * 7.75 * 3.151788), // Ratio exacto K05 Stellantis (268.69 / 85.25)
+      t5 = R2(n * 3.75 * 2.2909),
+      t9 = R2(f * 7.75 * 7.9452),
+      dev = R2(t6 + t7 + t0 + t5 + t9 + dt.f + dt.e),
+      baseSS = R2(dev + dt.bss),
+      cuotaIRPF = R2(dev * (dt.irpf / 100)),
+      // Desglose SS exacto por tramos como hace Stellantis (4.70% + 1.55% + 0.10% + 0.15%)
+      cuotaSS = R2(baseSS * 0.047) + R2(baseSS * 0.0155) + R2(baseSS * 0.001) + R2(baseSS * 0.0015),
+      ded = R2(cuotaIRPF + cuotaSS + dt.f99),
+      lq = R2(dev - ded + dt.net);
 
-document.getElementById('st').innerText = `(Trabajo:
-
-${msN[ms]})`;
-
-let g = document.getElementById('cg');
-g.innerHTML = '';
-let n = 0, f = 0, v = 0, dd = new Date(a, ms + 1,
-
-0).getDate();
-
-for (let i = 0; i < dd; i++) {
-let s = dt.d[i];
-if (s === 'noche') n++;
-if (s === 'festivo') f++;
-if (s === 'vacacion') v++;
-
-g.innerHTML += `<div class="dc ${s}"
-
-onclick="rD(${i})">${i + 1}</div>`;
-
+  document.getElementById('dp').innerHTML = `
+    <div class="fl"><span>G60 Base (${dg}d)</span><span>${t6.toFixed(2)} €</span></div>
+    ${v > 0 ? `<div class="fl" style="color:var(--g)"><span>G70 Vacaciones (${v}d)</span><span>${t7.toFixed(2)} €</span></div>` : ''}
+    <div class="fl"><span>K05 Nocturnidad (${n}n / ${(n*7.75).toFixed(2)}h)</span><span>${t0.toFixed(2)} €</span></div>
+    <div class="fl"><span>K75 Garantía (${(n*3.75).toFixed(2)}u)</span><span>${t5.toFixed(2)} €</span></div>
+    <div class="fl"><span>KA9 Festivos (${f}d / ${(f*7.75).toFixed(2)}h)</span><span>${t9.toFixed(2)} €</span></div>
+    <div class="fl"><span>Fijos (KEA, K70, Transp)</span><span>${dt.f.toFixed(2)} €</span></div>
+    ${dt.e > 0 ? `<div class="fl" style="color:var(--g)"><span>Extra / Atrasos</span><span>${dt.e.toFixed(2)} €</span></div>` : ''}
+    <div class="fl" style="margin-top:8px"><b>(A) TOTAL DEVENGOS</b><b>${dev.toFixed(2)} €</b></div>
+    <div class="fl" style="color:var(--r)"><span>IRPF (${dt.irpf}%) + F99 (${dt.f99}€)</span><span>-${(cuotaIRPF + dt.f99).toFixed(2)} €</span></div>
+    <div class="fl" style="color:var(--r)"><span>Seg. Social (6.50% de ${baseSS.toFixed(2)}€)</span><span>-${cuotaSS.toFixed(2)} €</span></div>
+    ${dt.net !== 0 ? `<div class="fl" style="color:var(--o)"><span>Ajuste Neto (Comedor/Otros)</span><span>${dt.net > 0 ? '+' : ''}${dt.net.toFixed(2)} €</span></div>` : ''}
+    <div class="fl" style="color:var(--bl);font-size:1.3em;margin-top:6px;border-bottom:0"><b>LÍQUIDO A PERCIBIR</b><b>${lq.toFixed(2)} €</b></div>
+  `;
 }
-let dg = Math.max(0, 30 - v),
-t6 = dg * 83.879,
-t7 = v * 83.879,
-t0 = n * 7.75 * 3.1517,
-t5 = n * 3.75 * 2.2909,
-t9 = f * 7.75 * 7.9452,
-dev = t6 + t7 + t0 + t5 + t9 + dt.f + dt.e,
-ded = dev * dt.r,
-lq = dev - ded;
-document.getElementById('dp').innerHTML = `
-<div class="fl"><span>G60 Base
-(${dg}d)</span><span>${t6.toFixed(2)} €</span></div>
 
-${v > 0 ? `<div class="fl"
-style="color:var(--g)"><span>G70 Vacaciones
-(${v}d)</span><span>${t7.toFixed(2)} €</span></div>` : ''}
-
-<div class="fl"><span>K05
-
-Nocturnidad</span><span>${t0.toFixed(2)} €</span></div>
-
-<div class="fl"><span>K75
-
-Garantía</span><span>${t5.toFixed(2)} €</span></div>
-
-<div class="fl"><span>KA9
-
-Festivos</span><span>${t9.toFixed(2)} €</span></div>
-<div class="fl"><span>Fijos (KEA,
-K70)</span><span>${dt.f.toFixed(2)} €</span></div>
-${dt.e > 0 ? `<div class="fl"
-
-style="color:var(--g)"><span>T00
-Extra/Atrasos</span><span>${dt.e.toFixed(2)} €</span></div>` : ''}
-<div class="fl" style="margin-top:10px"><b>TOTAL
-
-DEVENGADO</b><b>${dev.toFixed(2)} €</b></div>
-
-<div class="fl" style="color:var(--r)"><span>IRPF +
-
-SS</span><span>-${ded.toFixed(2)} €</span></div>
-
-<div class="fl"
-
-style="color:var(--bl);font-size:1.3em;margin-top:5px"><b>LÍQUIDO A
-PERCIBIR</b><b>${lq.toFixed(2)} €</b></div>
-
-`;
-}
 window.onload = iM;
 if ('serviceWorker' in navigator) {
-window.addEventListener('load', () => {
-navigator.serviceWorker.register('./sw.js')
-.then(reg => console.log('Service Worker OK',
-
-reg))
-
-.catch(err => console.error('Service Worker
-
-Error', err));
-});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
 </script>
 </body>
