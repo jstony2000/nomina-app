@@ -1,51 +1,47 @@
-const CACHE_NAME = 'nomina-stellantis-v49';
-const urlsToCache = [
+const CACHE_NAME = 'nomina-stellantis-v50-pro';
+const ASSETS = [
   './',
-  './index.html'
+  './index.html',
+  './manifest.json'
 ];
 
-// Instalación: Guarda los archivos esenciales la primera vez
+// 1. Instalación: fuerza la activación inmediata sin esperar a que se cierren las pestañas
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS).catch(() => {});
+    })
   );
-  self.skipWaiting(); // Fuerza a que el SW se active inmediatamente
 });
 
-// Activación: Limpia cachés de versiones antiguas para que no se atasque
+// 2. Activación: purga cualquier caché antigua (V49 o anteriores) y toma el control
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim(); // Toma el control de las pestañas abiertas
 });
 
-// Estrategia Network-First: Busca internet, si falla, usa caché
+// 3. Estrategia Network-First: busca siempre la última versión en GitHub; si no hay red, usa caché
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Si hay internet, actualizamos la caché con la versión más fresca
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-        }
+        const resClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, resClone);
+        });
         return response;
       })
-      .catch(() => {
-        // Si no hay internet (fábrica), tiramos de lo guardado
-        return caches.match(event.request);
-      })
+      .catch(() => caches.match(event.request))
   );
 });

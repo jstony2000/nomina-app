@@ -9,6 +9,7 @@
 body { background: var(--b); color: var(--t); font-family: sans-serif; margin: 0; padding-bottom: 20px; }
 .hd { display: flex; justify-content: space-between; background: #000; padding: 15px; align-items: center; }
 .hd button { background: #333; color: #fff; border: 0; padding: 10px 15px; border-radius: 4px; font-size: 1.2em; cursor: pointer; }
+.ver-badge { display: inline-block; background: #222; color: var(--bl); border: 1px solid var(--bl); font-size: 0.7em; padding: 2px 6px; border-radius: 4px; font-weight: bold; vertical-align: middle; margin-left: 6px; }
 .wd { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 10px 15px 0; text-align: center; color: #888; font-size: 0.85em; font-weight: bold; }
 .cg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 10px 15px; }
 .dc { background: #2c2c2c; border-radius: 6px; padding: 18px 0; text-align: center; font-weight: bold; cursor: pointer; user-select: none; }
@@ -27,6 +28,7 @@ input { width: 100%; padding: 10px; margin: 4px 0 8px; background: #333; color: 
 .l-n::before { color: var(--bl); }
 .l-f::before { color: var(--r); }
 .l-v::before { color: var(--g); }
+.ft { text-align: center; font-size: 0.75em; color: #666; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -34,7 +36,7 @@ input { width: 100%; padding: 10px; margin: 4px 0 8px; background: #333; color: 
 <div class="hd">
   <button onclick="cM(-1)">◀</button>
   <div style="text-align:center">
-    <h3 id="mt" style="margin:0;font-size:1.25em"></h3>
+    <h3 style="margin:0;font-size:1.2em"><span id="mt"></span><span class="ver-badge">V50 PRO</span></h3>
     <small id="st" style="color:var(--g)"></small>
   </div>
   <button onclick="cM(1)">▶</button>
@@ -52,10 +54,11 @@ input { width: 100%; padding: 10px; margin: 4px 0 8px; background: #333; color: 
 </div>
 <div class="cg" id="cg"></div>
 <div class="pn" id="dp"></div>
+<div class="ft">Stellantis Vigo · Motor Fiscal V50 PRO (Desacoplado IRPF/SS)</div>
 
 <div class="mod" id="md">
   <div class="mc">
-    <h3 style="margin-top:0">Ajustes del Mes</h3>
+    <h3 style="margin-top:0">Ajustes del Mes <span class="ver-badge">V50 PRO</span></h3>
     <label>Fijos Imponibles (KEA 17.77 + Transp 3.64 + K70) €:</label>
     <input id="iF" type="number" step="0.01">
     
@@ -79,6 +82,7 @@ input { width: 100%; padding: 10px; margin: 4px 0 8px; background: #333; color: 
 </div>
 
 <script>
+const APP_VER = "V50 PRO";
 let a = 2026, ms = 7, db = JSON.parse(localStorage.getItem('nDB')) || {};
 const msN = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
@@ -89,7 +93,6 @@ function iM() {
   if (!db[k]) {
     db[k] = { d: Array(31).fill('libre'), f: 38.37, e: 0, irpf: 20.64, bss: 443.18, f99: 1.22, net: 0 };
   } else {
-    // Migración automática de datos antiguos de V49 a V50
     if (db[k].irpf === undefined) {
       let oldR = db[k].r || 0.2714;
       db[k].irpf = oldR < 1 ? R2((oldR - 0.065) * 100) : oldR;
@@ -143,14 +146,13 @@ function m(o) {
 
 function rUI() {
   let k = a + '-' + ms, dt = db[k], mc = (ms + 1) % 12, ac = mc === 0 ? a + 1 : a;
-  document.getElementById('mt').innerText = `NÓMINA ${msN[ms]} ${a}`;
+  document.getElementById('mt').innerText = `${msN[ms]} ${a}`;
   document.getElementById('st').innerText = `(Ingreso fin de ${msN[mc]} ${ac})`;
 
   let g = document.getElementById('cg');
   g.innerHTML = '';
   let n = 0, f = 0, v = 0, dd = new Date(a, ms + 1, 0).getDate();
   
-  // Alinear día 1 con el día de la semana (Lunes = 0 ... Domingo = 6)
   let firstDay = (new Date(a, ms, 1).getDay() + 6) % 7;
   for (let w = 0; w < firstDay; w++) {
     g.innerHTML += `<div class="dc empty"></div>`;
@@ -159,7 +161,7 @@ function rUI() {
   for (let i = 0; i < dd; i++) {
     let s = dt.d[i];
     if (s === 'noche') n++;
-    if (s === 'festivo') { f++; n++; } // Festivo trabajado en turno noche suma ambos
+    if (s === 'festivo') { f++; n++; }
     if (s === 'vacacion') v++;
     g.innerHTML += `<div class="dc ${s}" onclick="rD(${i})">${i + 1}</div>`;
   }
@@ -167,13 +169,12 @@ function rUI() {
   let dg = Math.max(0, 30 - v),
       t6 = R2(dg * 83.879),
       t7 = R2(v * 83.879),
-      t0 = R2(n * 7.75 * 3.151788), // Ratio exacto K05 Stellantis (268.69 / 85.25)
+      t0 = R2(n * 7.75 * 3.151788),
       t5 = R2(n * 3.75 * 2.2909),
       t9 = R2(f * 7.75 * 7.9452),
       dev = R2(t6 + t7 + t0 + t5 + t9 + dt.f + dt.e),
       baseSS = R2(dev + dt.bss),
       cuotaIRPF = R2(dev * (dt.irpf / 100)),
-      // Desglose SS exacto por tramos como hace Stellantis (4.70% + 1.55% + 0.10% + 0.15%)
       cuotaSS = R2(baseSS * 0.047) + R2(baseSS * 0.0155) + R2(baseSS * 0.001) + R2(baseSS * 0.0015),
       ded = R2(cuotaIRPF + cuotaSS + dt.f99),
       lq = R2(dev - ded + dt.net);
